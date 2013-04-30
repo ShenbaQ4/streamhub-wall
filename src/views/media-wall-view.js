@@ -8,29 +8,34 @@ define([
     'streamhub-sdk/content/views/content-view',
     'streamhub-sdk/util'
 ], function($, View, ContentView, Util) {
-    
+
     /**
      * A view that displays Content in a media wall.
      * @alias module:streamhub-sdk/views/media-wall-view
      * @param opts {Object} A set of options to config the view with
      * @param opts.el {HTMLElement} The element in which to render the streamed content
+     * @param [opts.relayoutWait=200] {number} The number of milliseconds to wait when debouncing .relayout() 
      * @constructor
      */
     var MediaWallView = function(opts) {
-        View.call(this, opts);
         var self = this;
-        
+        View.call(this, opts);
+        opts = opts || {};
+
         this.el = opts.el || document.createElement('div');
         $(this.el).addClass('streamhub-media-wall-view');
         this.sortOrder = opts.sortOrder || (function(obj) {
             return obj.createdAt * 1000 || 0;
         });
-        
+        this.debouncedRelayout = debounce(function () {
+            self._relayout.apply(self, arguments);
+        }, opts.debounceRelayout || 200);
+
         // these are data structures for efficiently storing, adding
         // and searching displayed content
         this.contentViews = {};
         this.contentViewKeys = [];
-        
+
         self.on('add', function(content, stream) {
             self.add(content, stream);
         });
@@ -47,7 +52,6 @@ define([
      */
     MediaWallView.prototype.add = function(content, stream) {
         var self = this;
-        
         var sortKey = this.sortOrder(content);
         // todo: make this work more reliably... (currently assumes sortKey is a big number)
         while (this.contentViews.hasOwnProperty(sortKey)) {
@@ -77,17 +81,27 @@ define([
         $(this.el).prepend(contentView.el);
         this.relayout();
     };
-    
-    MediaWallView.prototype.relayout = function() {
+
+    MediaWallView.prototype.relayout = function (opts) {
+        opts = opts || {};
+        if (opts.force) {
+            this._relayout.apply(this, arguments);
+        } else {
+            this.debouncedRelayout.apply(this, arguments);
+        }
+    };
+
+    MediaWallView.prototype._relayout = function(opts) {
         var columnWidth = 0;
         var columnHeights = [];
         var cols = 0;
         var containerWidth = Util.innerWidth($(this.el));
-        
+        var maximumY;
+
         for (var i in this.contentViewKeys) {
             var contentView = this.contentViews[this.contentViewKeys[i]];
             var $contentView = $(contentView.el);
-            
+
             if (columnWidth === 0) {
                 columnWidth = Util.outerWidth($contentView);
                 if (columnWidth !== 0) {
@@ -99,7 +113,7 @@ define([
             }
             // get the minimum Y value from the columns
             var minimumY = Math.min.apply( Math, columnHeights );
-            var maximumY = Math.max.apply( Math, columnHeights );
+            maximumY = Math.max.apply( Math, columnHeights );
             var shortCol = 0;
 
             // Find index of short column, the first from the left
@@ -112,20 +126,52 @@ define([
             // position the content
             var x = columnWidth * shortCol;
             var y = minimumY;
-            
-            $contentView.css('position', 'absolute');
-            $contentView.css('left', x + 'px');
-            $contentView.css('top', y + 'px');
-            
+
+            $contentView.css({
+                position: 'absolute',
+                left: x+'px',
+                top: y+'px'
+            });
+
             // apply height to column
             columnHeights[shortCol] = minimumY + Util.outerHeight($contentView);
             if (columnHeights[shortCol] > maximumY) {
                 maximumY = columnHeights[shortCol];
             }
-            
-            $(this.el).css('height', maximumY + 'px');
         }
+
+        $(this.el).css('height', maximumY + 'px');
     };
+
+    /**
+     * Returns a function, that, as long as it continues to be invoked, will not be triggered.
+     * The function will be called after it stops being called for N milliseconds.
+     * Copied from Underscore.js (MIT License) http://underscorejs.org/docs/underscore.html#section-65
+     * @param func {function} The function to debounce
+     * @param wait {number} The number of milliseconds to wait for execution of func
+     * @param immediate {boolean} trigger the function on the leading edge, instead of the trailing.
+     * @return {function} A debounced version of the passed `func`
+     */
+    function debounce(func, wait, immediate) {
+        var timeout, result;
+        return function() {
+            var context = this,
+                args = arguments;
+            var later = function() {
+                timeout = null;
+                if (!immediate) {
+                    result = func.apply(context, args);
+                }
+            };
+            var callNow = immediate && !timeout;
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+            if (callNow) {
+                result = func.apply(context, args);
+            }
+            return result;
+        };
+    }
 
     return MediaWallView;
 });

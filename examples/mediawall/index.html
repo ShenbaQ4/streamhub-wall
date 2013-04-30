@@ -1,9 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <link rel="stylesheet" type="text/css" href="../lib/jasmine/lib/jasmine-core/jasmine.css">
-    <link rel="stylesheet" type="text/css" href="../src/views/css/list-view.css">
-    <link rel="stylesheet" type="text/css" href="../src/css/style.css">
+    <link rel="stylesheet" type="text/css" href="../lib/streamhub-sdk/src/css/style.css">
     <style>
     body {
         font-family: sans-serif;
@@ -48,21 +46,23 @@
         <script>
         require([
             'streamhub-sdk',
-            'streamhub-sdk/views/media-wall-view'
+            'streamhub-wall/views/media-wall-view'
         ],function (Hub, MediaWallView) {
             var opts = {
                 "network": "labs-t402.fyre.co",
                 "siteId": "303827",
-                "articleId": "labs_demo_fire",
+                // Fast Collection
+                // "articleId": "labs_demo_fire",
+                "articleId": "sh_col_51_1366914813",
                 "environment": "t402.livefyre.com"
             };
             
-            var view = window.gene = new MediaWallView({
+            var view = window.view = new MediaWallView({
                 el: document.getElementById("view")
             });
 
             var livefyreStreams = Hub.StreamManager.create.livefyreStreams(opts)
-            livefyreStreams.bindView(view).start();
+            livefyreStreams.bind(view).start();
         });
         </script>
     </body>
