@@ -1,0 +1,18 @@
+{
+  "name": "streamhub-wall",
+  "version": "0.0.0",
+  "main": [
+    "./src/main.js"
+  ],
+  "dependencies": {
+    "requirejs": "~2.1.5",
+    "jquery": "~1.9.1",
+    "requirejs-text": "~2.0.5",
+    "jasmine": "*",
+    "jasmine-jquery": "*",
+    "zepto": "git://github.com/genehallman/streamhub-zepto.git",
+    "almond": "~0.2.5",
+    "hogan": "latest",
+    "requirejs-hogan-plugin": "git://github.com/millermedeiros/requirejs-hogan-plugin.git#~0.2.1"
+  }
+}
