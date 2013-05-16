@@ -1,5 +1,4 @@
 require.config({
-  baseUrl: '/',
   paths: {
     jquery: 'lib/jquery/jquery',
     text: 'lib/requirejs-text/text',
@@ -12,7 +11,7 @@ require.config({
   },
   packages: [{
      name: "streamhub-wall",
-     location: "src/"
+     location: "./src"
   },{
      name: "streamhub-sdk",
      location: "lib/streamhub-sdk/src/"
@@ -20,12 +19,6 @@ require.config({
   shim: {
     jquery: {
         exports: '$'
-    },
-    'jquery-isotope': {
-        deps: ['jquery']
-    },
-    'jquery-imagesloaded': {
-        deps: ['jquery']
     },
     jasmine: {
         exports: 'jasmine'
