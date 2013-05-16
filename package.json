@@ -25,6 +25,6 @@
     "jsdoc": "rm -rf docs/api && ./node_modules/jsdoc/jsdoc -c tools/jsdoc.conf.json"
   },
   "streamhub": {
-    "sampleImages": ["https://raw.github.com/Livefyre/streamhub-wall/master/sampleImage.png"]
+    "sampleImages": ["https://raw.github.com/Livefyre/streamhub-wall/master/sample.png"]
   }
 }
