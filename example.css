@@ -7,7 +7,7 @@ a {
 .content, .content[data-content-has-avatar=true] {
     background-color:white;
     margin: 10px;
-    width: 300px;
+    width: 200px;
     overflow-x: hidden;
 }
 #example .content {
