@@ -1,7 +1,3 @@
-/** 
- * A module to render tiled walls of Content
- * @module streamhub-sdk/views/media-wall-view
- */
 define([
     'jquery',
     'streamhub-sdk/view',
@@ -11,10 +7,10 @@ define([
 
     /**
      * A view that displays Content in a media wall.
-     * @alias module:streamhub-sdk/views/media-wall-view
      * @param opts {Object} A set of options to config the view with
      * @param opts.el {HTMLElement} The element in which to render the streamed content
-     * @param [opts.relayoutWait=200] {number} The number of milliseconds to wait when debouncing .relayout() 
+     * @param opts.relayoutWait {number} The number of milliseconds to wait when debouncing
+     *        .relayout(). Defaults to 200ms. 
      * @constructor
      */
     var MediaWallView = function(opts) {
@@ -51,6 +47,7 @@ define([
      * @return the newly created ContentView
      */
     MediaWallView.prototype.add = function(content, stream) {
+        console.log(this, arguments);
         var self = this;
         var sortKey = this.sortOrder(content);
         // todo: make this work more reliably... (currently assumes sortKey is a big number)
