@@ -47,7 +47,6 @@ define([
      * @return the newly created ContentView
      */
     MediaWallView.prototype.add = function(content, stream) {
-        console.log(this, arguments);
         var self = this;
         var sortKey = this.sortOrder(content);
         // todo: make this work more reliably... (currently assumes sortKey is a big number)
