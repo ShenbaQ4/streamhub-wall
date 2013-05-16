@@ -7,7 +7,7 @@ define(function(require) {
             network: "labs-t402.fyre.co",
             environment: "t402.livefyre.com",
             siteId: "303827",
-            articleId: 'sh_col_51_1366914813'
+            articleId: 'labs_demo_fire'
         });
         var view = new View({el: el});
         
