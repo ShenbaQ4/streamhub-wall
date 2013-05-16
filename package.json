@@ -23,5 +23,8 @@
     "test-jenkins": "node tests/runner.js > tests.log",
     "build-version": "node tools/build_version.js",
     "jsdoc": "rm -rf docs/api && ./node_modules/jsdoc/jsdoc -c tools/jsdoc.conf.json"
+  },
+  "streamhub": {
+    "sampleImages": ["https://raw.github.com/Livefyre/streamhub-wall/master/sampleImage.png"]
   }
 }
