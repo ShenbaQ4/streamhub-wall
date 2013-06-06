@@ -38,7 +38,7 @@ define([
         this.el = opts.el || document.createElement('div');
         $(this.el).addClass('streamhub-media-wall-view');
         if (!MEDIA_WALL_STYLE_EL) {
-            MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).appendTo('body');
+            MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('body');
         }
         this.sortOrder = opts.sortOrder || (function(obj) {
             return obj.createdAt * 1000 || 0;
