@@ -5,6 +5,23 @@ define([
     'streamhub-sdk/util'
 ], function($, View, ContentView, Util) {
 
+    var MEDIA_WALL_STYLE_EL;
+    var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
+	    position:relative; \
+	} \
+	.streamhub-media-wall-view article.content { \
+	    width:250px; \
+	    margin:5px; \
+	    -webkit-transition-duration: 1s; \
+	       -moz-transition-duration: 1s; \
+	        -ms-transition-duration: 1s; \
+	         -o-transition-duration: 1s; \
+	            transition-duration: 1s; \
+	    -webkit-transition-property: -webkit-transform, opacity, top, left; \
+	       -moz-transition-property:    -moz-transform, opacity, top, left; \
+	        -ms-transition-property:     -ms-transform, opacity, top, left; \
+	         -o-transition-property:      -o-transform, opacity, top, left; \
+	            transition-property:         transform, opacity, top, left; }";
     /**
      * A view that displays Content in a media wall.
      * @param opts {Object} A set of options to config the view with
@@ -20,6 +37,9 @@ define([
 
         this.el = opts.el || document.createElement('div');
         $(this.el).addClass('streamhub-media-wall-view');
+        if (!MEDIA_WALL_STYLE_EL) {
+            MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).appendTo('body');
+        }
         this.sortOrder = opts.sortOrder || (function(obj) {
             return obj.createdAt * 1000 || 0;
         });
