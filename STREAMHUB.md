@@ -1,6 +1,6 @@
-# MediaWall
+# LiveMediaWall
 
-Livefyre MediaWall turns StreamHub's social feeds into a visually engaging, full-screen tiled Content experience that's great for covering live events, hosting photo contests, and powering social sections of your website.
+LiveMediaWall displays StreamHub social feeds as a visually engaging, full-screen tiled Content experience that's great for covering live events, hosting photo contests, and powering social sections of your website.
 
 ## Features
 
@@ -23,4 +23,4 @@ MediaWall has been used on many StreamHub-powered sites, including:
 
 MediaWall is an embeddable JavaScript application that runs in any HTML5-compatible browser, including mobile devices and tablets. The included Developer Documentation explains the API to instantiate a MediaWall and stream in Content from a StreamHub Collection.
 
-StreamHub Apps require a [Livefyre StreamHub](http://www.livefyre.com/streamhub/) subscription to power Curation, Collection, Content storage, and real-time syndication. To inquire about subscribing to StreaHub, [contact](mailto:sales@livefyre.com) Livefyre.
+StreamHub Apps require a [Livefyre StreamHub](http://www.livefyre.com/streamhub/) subscription to power Curation, Collection, Content storage, and real-time syndication. To inquire about subscribing to StreamHub, [contact](mailto:sales@livefyre.com) Livefyre.
