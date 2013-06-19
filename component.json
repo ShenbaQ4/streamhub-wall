@@ -15,5 +15,15 @@
     "almond": "~0.2.5",
     "hogan": "latest",
     "requirejs-hogan-plugin": "git://github.com/millermedeiros/requirejs-hogan-plugin.git#~0.2.1"
+  },
+  "streamhub": {
+    "icon": "https://raw.github.com/Livefyre/streamhub-wall/master/images/wall-thumbbigHF-302x227.png",
+    "iconHover": "https://raw.github.com/Livefyre/streamhub-wall/master/images/wall-thumbbigLF-302x227.png",
+    "background": "https://raw.github.com/Livefyre/streamhub-wall/master/images/appgallery-wall-v2.jpg",
+    "sampleImages": [
+      "https://raw.github.com/Livefyre/streamhub-wall/master/images/wall-thumbprev-700x525_1.png",
+      "https://raw.github.com/Livefyre/streamhub-wall/master/images/wall-thumbprev-700x525_2.png",
+      "https://raw.github.com/Livefyre/streamhub-wall/master/images/wall-thumbprev-700x525_3.png"
+    ]
   }
 }
