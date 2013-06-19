@@ -1,6 +1,6 @@
 ({
   paths: {
-    jquery: 'lib/zepto/zepto',
+    'streamhub-zepto': 'lib/streamhub-zepto/build/zepto.min',
     almond: 'lib/almond/almond',
     'streamhub-sdk': 'http://cdn.livefyre.com/libs/sdk/v1.0.0/streamhub-sdk.min.gz.js'
   },
@@ -8,16 +8,12 @@
      name: "streamhub-wall",
      location: "src"
   }],
-  shim: {
-    jquery: {
-        exports: '$'
-    }
-  },
+  shim: {},
   baseUrl: '.',
   name: "streamhub-wall",
   include: ['almond'],
   stubModules: ['text', 'hgn'],
-  exclude: ['almond', 'jquery'],
+  exclude: ['almond', 'streamhub-zepto'],
 
   //todo: make this streamhub-sdk-$SDK_VERSION+build.$BUILD_NUMBER.min.js
   out: "streamhub-wall.min.js",
