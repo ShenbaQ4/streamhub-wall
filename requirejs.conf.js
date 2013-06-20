@@ -32,6 +32,5 @@ require.config({
         deps: ['jquery', 'jasmine']
     }
   },
-  urlArgs: "_=" +  (new Date()).getTime(), 
-  baseUrl: "/"
+  urlArgs: "_=" +  (new Date()).getTime()
 });
