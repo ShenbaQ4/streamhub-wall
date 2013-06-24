@@ -7,8 +7,7 @@ require.config({
     hgn: 'lib/requirejs-hogan-plugin/hgn',
     jasmine: 'lib/jasmine/lib/jasmine-core/jasmine',
     'jasmine-html': 'lib/jasmine/lib/jasmine-core/jasmine-html',
-    'jasmine-jquery': 'lib/jasmine-jquery/lib/jasmine-jquery',
-    'streamhub-zepto': 'lib/streamhub-zepto/build/zepto.min'
+    'jasmine-jquery': 'lib/jasmine-jquery/lib/jasmine-jquery'
   },
   packages: [{
      name: "streamhub-wall",
