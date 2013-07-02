@@ -9,9 +9,11 @@ define([
     var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
 	    position:relative; \
 	} \
+    .streamhub-media-wall-view {\
+        background-color: #efefef;}\
 	.streamhub-media-wall-view article.content { \
-	    width:250px; \
-	    margin:5px; \
+	    max-width: 304px; \
+	    margin: 0 10px 20px 10px; \
 	    -webkit-transition-duration: 1s; \
 	       -moz-transition-duration: 1s; \
 	        -ms-transition-duration: 1s; \
