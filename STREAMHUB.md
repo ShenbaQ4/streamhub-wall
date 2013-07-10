@@ -1,6 +1,6 @@
-# LiveMediaWall
+# streamhub-wall
 
-LiveMediaWall displays StreamHub social feeds as a visually engaging, full-screen tiled Content experience that's great for covering live events, hosting photo contests, and powering social sections of your website.
+streamhub-wall displays StreamHub social feeds as a visually engaging, full-screen tiled Content experience that's great for covering live events, hosting photo contests, and powering social sections of your website.
 
 ## Features
 
