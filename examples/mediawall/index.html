@@ -34,7 +34,24 @@
             });
 
             var livefyreStreams = Hub.StreamManager.create.livefyreStreams(opts)
-            livefyreStreams.bind(view).start();
+            
+            /* Uncomment to filter out content without attachments
+            livefyreStreams.on('readable', function (stream) {
+                var content = stream.read();
+                // Add now if there are attachments
+                if (content.attachments.length) {
+                    return view.add(content);
+                }
+                // If no attachments yet, if one is added, then show in wall
+                content.on('attachment', function () {
+                    console.log('attach', content.attachments);
+                    view.add(content);
+                });
+            });
+            */
+
+            livefyreStreams.bind(view);
+            livefyreStreams.start();
         });
         </script>
     </body>
