@@ -1,5 +1,5 @@
 define([
-    'jquery',
+    'streamhub-sdk/jquery',
     'streamhub-sdk/view',
     'streamhub-sdk/content/views/content-view',
     'streamhub-sdk/util'
@@ -10,7 +10,7 @@ define([
 	    position:relative; \
 	} \
 	.streamhub-media-wall-view article.content { \
-	    width:250px; \
+	    width:320px; \
 	    margin:5px; \
 	    -webkit-transition-duration: 1s; \
 	       -moz-transition-duration: 1s; \
@@ -27,17 +27,19 @@ define([
      * @param opts {Object} A set of options to config the view with
      * @param opts.el {HTMLElement} The element in which to render the streamed content
      * @param opts.relayoutWait {number} The number of milliseconds to wait when debouncing
-     *        .relayout(). Defaults to 200ms. 
+     *        .relayout(). Defaults to 200ms.
+     * @param opts.css {boolean} Whether to insert default media wall css. Default true.
      * @constructor
      */
     var MediaWallView = function(opts) {
         var self = this;
         View.call(this, opts);
         opts = opts || {};
+        opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
 
         this.el = opts.el || document.createElement('div');
         $(this.el).addClass('streamhub-media-wall-view');
-        if (!MEDIA_WALL_STYLE_EL) {
+        if (!MEDIA_WALL_STYLE_EL && opts.css) {
             MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('head');
         }
         this.sortOrder = opts.sortOrder || (function(obj) {
