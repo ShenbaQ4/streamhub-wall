@@ -1,9 +1,9 @@
 define([
     'streamhub-sdk/jquery',
-    'streamhub-sdk/view',
+    'streamhub-sdk/views/list-view',
     'streamhub-sdk/content/views/content-view',
     'streamhub-sdk/util'
-], function($, View, ContentView, Util) {
+], function($, ListView, ContentView, Util) {
 
     var MEDIA_WALL_STYLE_EL;
     var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
@@ -33,7 +33,7 @@ define([
      */
     var MediaWallView = function(opts) {
         var self = this;
-        View.call(this, opts);
+        ListView.call(this, opts);
         opts = opts || {};
         opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
 
@@ -42,26 +42,16 @@ define([
         if (!MEDIA_WALL_STYLE_EL && opts.css) {
             MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('head');
         }
-        this.sortOrder = opts.sortOrder || (function(obj) {
-            return obj.createdAt * 1000 || 0;
-        });
+
         this.debouncedRelayout = debounce(function () {
             self._relayout.apply(self, arguments);
         }, opts.debounceRelayout || 200);
 
-        // these are data structures for efficiently storing, adding
-        // and searching displayed content
-        this.contentViews = {};
-        this.contentViewKeys = [];
-
-        self.on('add', function(content, stream) {
-            self.add(content, stream);
-        });
         $(window).resize(function() {
             self.relayout();
         });
     };
-    $.extend(MediaWallView.prototype, View.prototype);
+    MediaWallView.prototype = new ListView();
 
     /**
      * Add a piece of Content to the MediaWallView
@@ -69,34 +59,13 @@ define([
      * @return the newly created ContentView
      */
     MediaWallView.prototype.add = function(content, stream) {
-        var self = this;
-        var sortKey = this.sortOrder(content);
-        // todo: make this work more reliably... (currently assumes sortKey is a big number)
-        while (this.contentViews.hasOwnProperty(sortKey)) {
-            sortKey = sortKey + 1;
-        }
-
-        var contentView = this.createContentView(content);
-        contentView.render();
+        var self = this,
+            contentView = ListView.prototype.add.call(this, content)
 
         $(contentView.el).on('imageLoaded', function() {
             self.relayout();
         });
 
-        // finding where the insertion should be - a naive solution is to search left to right
-        // which is fine for us, because we're typically prepending 
-        var sortKeyIndex = 0;
-        for (var i in this.contentViewKeys) {
-            if (sortKey < this.contentViewKeys[i] && sortKey > this.contentViewKeys[i+1]) {
-                sortKeyIndex = i;
-                break;
-            }
-        }
-
-        this.contentViews[sortKey] = contentView;
-        this.contentViewKeys.splice(sortKeyIndex, 0, sortKey);
-
-        $(this.el).prepend(contentView.el);
         this.relayout();
     };
 
@@ -116,9 +85,8 @@ define([
         var containerWidth = Util.innerWidth($(this.el));
         var maximumY;
 
-        for (var i in this.contentViewKeys) {
-            var contentView = this.contentViews[this.contentViewKeys[i]];
-            var $contentView = $(contentView.el);
+        $.each(this.contentViews, function (index, contentView) {
+            var $contentView = contentView.$el;
 
             if (columnWidth === 0) {
                 columnWidth = Util.outerWidth($contentView);
@@ -156,7 +124,7 @@ define([
             if (columnHeights[shortCol] > maximumY) {
                 maximumY = columnHeights[shortCol];
             }
-        }
+        });
 
         $(this.el).css('height', maximumY + 'px');
     };

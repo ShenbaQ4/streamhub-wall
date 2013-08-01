@@ -40,5 +40,31 @@ describe('A MediaWallView', function () {
             streams.start();
         });
     });
+
+    describe("when adding content with different .createdAt dates", function () {
+        var view,
+            startDateInt = 1375383041586,
+            date1 = new Date(startDateInt),
+            date2 = new Date(startDateInt + 1 * 10000),
+            date3 = new Date(startDateInt + 2 * 10000),
+            content1, content2, content3;
+        beforeEach(function () {
+            view = new MediaWallView();
+            content1 = new Hub.Content({ body: 'what1' });
+            content1.createdAt = date1;
+            content2 = new Hub.Content({ body: 'what2' });
+            content2.createdAt = date2;
+            content3 = new Hub.Content({ body: 'what3' });
+            content3.createdAt = date3;
+            view.add(content3);
+            view.add(content1);
+            view.add(content2);
+        });
+        it("should order .contentViews by .comparator", function () {
+            var sortedContentViews = view.contentViews.slice(0);
+            sortedContentViews.sort(view.comparator);
+            expect(view.contentViews).toEqual(sortedContentViews);
+        });
+    });
 }); 
 });
