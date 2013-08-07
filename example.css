@@ -1,25 +1,3 @@
-#example {
-    position:relative;
-}
-a {
-    text-decoration: none;
-}
 .content, .content[data-content-has-avatar=true] {
-    background-color:white;
-    margin: 10px;
-    width: 270px;
-    overflow-x: hidden;
-}
-#example .content {
-  -webkit-transition-duration: 1s;
-     -moz-transition-duration: 1s;
-      -ms-transition-duration: 1s;
-       -o-transition-duration: 1s;
-          transition-duration: 1s;
-
-  -webkit-transition-property: -webkit-transform, opacity, top, left;
-     -moz-transition-property:    -moz-transform, opacity, top, left;
-      -ms-transition-property:     -ms-transform, opacity, top, left;
-       -o-transition-property:      -o-transform, opacity, top, left;
-          transition-property:         transform, opacity, top, left;
+    width: 32%;
 }
