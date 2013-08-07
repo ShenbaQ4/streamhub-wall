@@ -62,7 +62,7 @@ define([
         var self = this,
             contentView = ListView.prototype.add.call(this, content)
 
-        $(contentView.el).on('imageLoaded', function() {
+        $(contentView.el).on('imageLoaded.hub', function() {
             self.relayout();
         });
 
