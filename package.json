@@ -4,7 +4,7 @@
   "author": "Livefyre <support@livefyre.com>",
   "version": "1.0.0",
   "devDependencies": {
-    "bower": "*",
+    "bower": "~1.0.0",
     "http-server": "*",
     "requirejs": "*",
     "phantom": "*",
