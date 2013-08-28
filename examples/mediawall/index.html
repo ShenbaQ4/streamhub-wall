@@ -19,9 +19,9 @@
         </script>
         <script>
         require([
-            'streamhub-sdk',
+            'streamhub-sdk/collection',
             'streamhub-wall'
-        ],function (Hub, MediaWallView) {
+        ],function (Collection, MediaWallView) {
             var opts = {
                 "network": "labs-t402.fyre.co",
                 "siteId": "303827",
@@ -33,30 +33,15 @@
 
             var view = window.view = new MediaWallView({
                 el: document.getElementById("view"),
-                minContentWidth: 300
+                minContentWidth: 300,
                 //,columns: 6
                 //,modal: false
+                initial: 5,
+                showMore: 2
             });
 
-            var livefyreStreams = Hub.StreamManager.create.livefyreStreams(opts)
-            
-            /* Uncomment to filter out content without attachments
-            livefyreStreams.on('readable', function (stream) {
-                var content = stream.read();
-                // Add now if there are attachments
-                if (content.attachments.length) {
-                    return view.add(content);
-                }
-                // If no attachments yet, if one is added, then show in wall
-                content.on('attachment', function () {
-                    console.log('attach', content.attachments);
-                    view.add(content);
-                });
-            });
-            */
-
-            livefyreStreams.bind(view);
-            livefyreStreams.start();
+            var collection = new Collection(opts);
+            collection.createArchive().pipe(view.more);
         });
         </script>
     </body>

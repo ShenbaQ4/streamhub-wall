@@ -226,7 +226,7 @@ define([
             }
         });
 
-        $(this.el).css('height', maximumY + 'px');
+        $(this.$listEl).css('height', maximumY + 'px');
     };
 
     /**
