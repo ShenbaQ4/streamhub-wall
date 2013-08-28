@@ -1,13 +1,13 @@
 {
   "name": "streamhub-wall",
-  "version": "1.0.0",
+  "version": "2.0.0-alpha.0",
   "main": [
     "./src/main.js"
   ],
   "dependencies": {
-    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v1.1.0",
+    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.0.0",
     "requirejs": "~2.1.5",
-    "jquery": "~1.9.1",
+    "jquery": "~1.10.1",
     "requirejs-text": "~2.0.5",
     "jasmine": "*",
     "jasmine-jquery": "*",

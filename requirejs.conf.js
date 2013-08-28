@@ -7,14 +7,19 @@ require.config({
     hgn: 'lib/requirejs-hogan-plugin/hgn',
     jasmine: 'lib/jasmine/lib/jasmine-core/jasmine',
     'jasmine-html': 'lib/jasmine/lib/jasmine-core/jasmine-html',
-    'jasmine-jquery': 'lib/jasmine-jquery/lib/jasmine-jquery'
+    'jasmine-jquery': 'lib/jasmine-jquery/lib/jasmine-jquery',
+    'event-emitter': 'lib/event-emitter/src/event-emitter',
+    inherits: 'lib/inherits/inherits'
   },
   packages: [{
-     name: "streamhub-wall",
-     location: "./src"
+    name: "streamhub-wall",
+    location: "./src"
   },{
-     name: "streamhub-sdk",
-     location: "lib/streamhub-sdk/src/"
+    name: "streamhub-sdk",
+    location: "lib/streamhub-sdk/src/"
+  },{
+    name: "stream",
+    location: "lib/stream/src"
   }],
   shim: {
     jquery: {
