@@ -3,6 +3,8 @@
 <head>
     <link rel="stylesheet" type="text/css" href="../lib/streamhub-sdk/src/css/style.css">
     <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
+    <style> body { margin: 0; padding: 0; }</style>
 </head>
     <body>
         
@@ -28,9 +30,10 @@
                 "articleId": "sh_col_51_1366914813",
                 "environment": "t402.livefyre.com"
             };
-            
+
             var view = window.view = new MediaWallView({
                 el: document.getElementById("view")
+                //,modal: false
             });
 
             var livefyreStreams = Hub.StreamManager.create.livefyreStreams(opts)
