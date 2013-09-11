@@ -3,15 +3,24 @@ define([
     'streamhub-sdk/views/list-view',
     'streamhub-sdk/content/views/content-view',
     'streamhub-sdk/util'
-], function($, ListView, ContentView, Util) {
+], function($, ListView, ContentView, util) {
 
     var MEDIA_WALL_STYLE_EL;
     var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
 	    position:relative; \
 	} \
+    .streamhub-media-wall-view .content-container { \
+        position: relative; \
+        margin: 0px; \
+        padding: 0 0 15px 0; \
+        border-radius: 3px; \
+        border: 1px solid rgba(0,0,0,0.15); \
+    } \
 	.streamhub-media-wall-view article.content { \
-	    width:320px; \
-	    margin:5px; \
+	    width: 320px; \
+        padding: 5px; \
+        border: none; \
+        box-sizing: border-box; \
 	    -webkit-transition-duration: 1s; \
 	       -moz-transition-duration: 1s; \
 	        -ms-transition-duration: 1s; \
@@ -33,14 +42,19 @@ define([
      */
     var MediaWallView = function(opts) {
         var self = this;
-        ListView.call(this, opts);
-        opts = opts || {};
-        opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
 
-        this.el = opts.el || document.createElement('div');
+        opts = opts || {};
+
+        ListView.call(this, opts);
+
         $(this.el).addClass('streamhub-media-wall-view');
+
+        opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
         if (!MEDIA_WALL_STYLE_EL && opts.css) {
             MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('head');
+        }
+        if (opts.columns && typeof opts.columns === 'number') {
+            $('<style>.streamhub-media-wall-view article.content { width: ' + 100/opts.columns + '%; }</style>').appendTo('head');
         }
 
         this.debouncedRelayout = debounce(function () {
@@ -51,7 +65,7 @@ define([
             self.relayout();
         });
     };
-    MediaWallView.prototype = new ListView();
+    util.inherits(MediaWallView, ListView);
 
     /**
      * Add a piece of Content to the MediaWallView
@@ -60,9 +74,12 @@ define([
      */
     MediaWallView.prototype.add = function(content, stream) {
         var self = this,
-            contentView = ListView.prototype.add.call(this, content)
+            contentView = ListView.prototype.add.call(this, content);
 
-        $(contentView.el).on('imageLoaded.hub', function() {
+        var contentContainerEl = $('<div class="content-container"></div>');
+        contentContainerEl.append(contentView.$el.children());
+        contentView.$el.append(contentContainerEl); 
+        contentView.$el.on('imageLoaded.hub', function() {
             self.relayout();
         });
 
@@ -82,14 +99,14 @@ define([
         var columnWidth = 0;
         var columnHeights = [];
         var cols = 0;
-        var containerWidth = Util.innerWidth($(this.el));
+        var containerWidth = $(this.el).innerWidth();
         var maximumY;
 
         $.each(this.contentViews, function (index, contentView) {
             var $contentView = contentView.$el;
 
             if (columnWidth === 0) {
-                columnWidth = Util.outerWidth($contentView);
+                columnWidth = $contentView[0].getBoundingClientRect().width;
                 if (columnWidth !== 0) {
                     cols = Math.floor(containerWidth / columnWidth);
                     for (var j = 0; j < cols; j++) {
@@ -120,7 +137,7 @@ define([
             });
 
             // apply height to column
-            columnHeights[shortCol] = minimumY + Util.outerHeight($contentView);
+            columnHeights[shortCol] = minimumY + $contentView.outerHeight(true);
             if (columnHeights[shortCol] > maximumY) {
                 maximumY = columnHeights[shortCol];
             }
