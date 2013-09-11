@@ -2,14 +2,14 @@ define([
     'streamhub-sdk/jquery',
     'streamhub-sdk/views/list-view',
     'streamhub-sdk/content/views/content-view',
-    'streamhub-sdk/util'
-], function($, ListView, ContentView, Util) {
+], function($, ListView, ContentView) {
 
     var MEDIA_WALL_STYLE_EL;
     var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
 	    position:relative; \
 	} \
 	.streamhub-media-wall-view article.content { \
+        opacity: 1; \
 	    width:320px; \
 	    margin:5px; \
 	    -webkit-transition-duration: 1s; \
@@ -21,7 +21,19 @@ define([
 	       -moz-transition-property:    -moz-transform, opacity, top, left; \
 	        -ms-transition-property:     -ms-transform, opacity, top, left; \
 	         -o-transition-property:      -o-transform, opacity, top, left; \
-	            transition-property:         transform, opacity, top, left; }";
+	            transition-property:         transform, opacity, top, left; } \
+    .streamhub-media-wall-view article.hub-wall-is-inserting { \
+        opacity: 0 ; \
+	    -webkit-transition-property: none; \
+	       -moz-transition-property: none; \
+	        -ms-transition-property: none; \
+	         -o-transition-property: none; \
+	            transition-property: none; \
+	    -webkit-transition: opacity 0.3s; \
+	       -moz-transition: opacity 0.3s; \
+	        -ms-transition: opacity 0.3s; \
+	         -o-transition: opacity 0.3s; \
+	            transition: opacity 0.3s; }";
     /**
      * A view that displays Content in a media wall.
      * @param opts {Object} A set of options to config the view with
@@ -60,14 +72,18 @@ define([
      */
     MediaWallView.prototype.add = function(content, stream) {
         var self = this,
-            contentView = ListView.prototype.add.call(this, content)
+            contentView = ListView.prototype.add.call(this, content),
+            $contentViewEl = $(contentView.el);
 
-        $(contentView.el).on('imageLoaded', function() {
+        $contentViewEl.addClass(this.insertingClassName);
+        $contentViewEl.on('imageLoaded', function() {
             self.relayout();
         });
 
         this.relayout();
     };
+
+    MediaWallView.prototype.insertingClassName = 'hub-wall-is-inserting';
 
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
@@ -79,17 +95,19 @@ define([
     };
 
     MediaWallView.prototype._relayout = function(opts) {
+        opts = opts || {};
         var columnWidth = 0;
         var columnHeights = [];
         var cols = 0;
-        var containerWidth = Util.innerWidth($(this.el));
+        var containerWidth = $(this.el).innerWidth();
         var maximumY;
 
+        var self = this;
         $.each(this.contentViews, function (index, contentView) {
             var $contentView = contentView.$el;
 
             if (columnWidth === 0) {
-                columnWidth = Util.outerWidth($contentView);
+                columnWidth = $contentView.outerWidth(true);
                 if (columnWidth !== 0) {
                     cols = Math.floor(containerWidth / columnWidth);
                     for (var j = 0; j < cols; j++) {
@@ -120,10 +138,12 @@ define([
             });
 
             // apply height to column
-            columnHeights[shortCol] = minimumY + Util.outerHeight($contentView);
+            columnHeights[shortCol] = minimumY + $contentView.outerHeight(true);
             if (columnHeights[shortCol] > maximumY) {
                 maximumY = columnHeights[shortCol];
             }
+
+            $contentView.removeClass(self.insertingClassName);
         });
 
         $(this.$listEl).css('height', maximumY + 'px');
