@@ -26,7 +26,20 @@ define([
 	.streamhub-media-wall-view article.content { \
         width: 100%; \
         border: 1px solid rgba(0,0,0,0.15); \
-        border-radius: 3px; }";
+        border-radius: 3px; }\
+    .streamhub-media-wall-view article.hub-wall-is-inserting { \
+        opacity: 0 ; \
+	    -webkit-transition-property: none; \
+	       -moz-transition-property: none; \
+	        -ms-transition-property: none; \
+	         -o-transition-property: none; \
+	            transition-property: none; \
+	    -webkit-transition: opacity 0.3s; \
+	       -moz-transition: opacity 0.3s; \
+	        -ms-transition: opacity 0.3s; \
+	         -o-transition: opacity 0.3s; \
+	            transition: opacity 0.3s; }";
+
     /**
      * A view that displays Content in a media wall.
      * @param opts {Object} A set of options to config the view with
@@ -121,9 +134,10 @@ define([
      * @return the newly created ContentView
      */
     MediaWallView.prototype.add = function(content) {
-        var self = this;
+        var self = this,
             contentView = ListView.prototype.add.call(this, content);
 
+        contentView.$el.addClass(this.insertingClassName);
         contentView.$el.on('imageLoaded.hub', function() {
             self.relayout();
         });
@@ -167,6 +181,8 @@ define([
         this.setColumns(numColumns);
     };
 
+    MediaWallView.prototype.insertingClassName = 'hub-wall-is-inserting';
+
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
 
@@ -178,6 +194,7 @@ define([
     };
 
     MediaWallView.prototype._relayout = function(opts) {
+        opts = opts || {};
         var columnWidth = 0;
         var columnHeights = [];
         var cols = 0;
@@ -185,6 +202,7 @@ define([
         var maximumY;
         var self = this;
 
+        var self = this;
         $.each(this.contentViews, function (index, contentView) {
             var $contentContainerEl = contentView.$el.parent('.'+self.contentContainerClassName);
 
@@ -221,9 +239,12 @@ define([
 
             // apply height to column
             columnHeights[shortCol] = minimumY + contentView.$el.outerHeight(true);
+
             if (columnHeights[shortCol] > maximumY) {
                 maximumY = columnHeights[shortCol];
             }
+
+            contentView.$el.removeClass(self.insertingClassName);
         });
 
         $(this.$listEl).css('height', maximumY + 'px');

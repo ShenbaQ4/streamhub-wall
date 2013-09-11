@@ -20,8 +20,9 @@
         <script>
         require([
             'streamhub-sdk/collection',
+            'streamhub-sdk/content/content',
             'streamhub-wall'
-        ],function (Collection, MediaWallView) {
+        ],function (Collection, Content, MediaWallView) {
             var opts = {
                 "network": "labs-t402.fyre.co",
                 "siteId": "303827",
@@ -42,6 +43,10 @@
 
             var collection = new Collection(opts);
             collection.createArchive().pipe(view.more);
+
+            setInterval(function () {
+                view.write(new Content({ body: 'blah' }));
+            }, 5000);
         });
         </script>
     </body>
