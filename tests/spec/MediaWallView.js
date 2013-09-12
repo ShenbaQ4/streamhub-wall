@@ -15,6 +15,7 @@ describe('A MediaWallView', function () {
     	it ("with empty options", function () {
         	var view = new MediaWallView({});
         	expect(view).toBeDefined();
+            expect(view._autoFitColumns).toBe(true);
     	});
 	    it ("with an el", function () {
 	        setFixtures('<div id="hub-MediaWallView"></div>');  
@@ -23,6 +24,15 @@ describe('A MediaWallView', function () {
 	        });
 	        expect(view).toBeDefined();
 	    });
+        it('with .columns option', function () {
+            setFixtures('<div id="hub-MediaWallView"></div>');
+            var view = new MediaWallView({
+                el: $('#hub-MediaWallView'),
+                columns: 8
+            });
+            expect(view._columns).toBe(8);
+            expect(view._autoFitColumns).toBe(false);
+        });
 	});
 	
 	// post construction behavior    
@@ -64,6 +74,50 @@ describe('A MediaWallView', function () {
             var sortedContentViews = view.contentViews.slice(0);
             sortedContentViews.sort(view.comparator);
             expect(view.contentViews).toEqual(sortedContentViews);
+        });
+    });
+
+    describe("auto fitting columns", function () {
+        var view,
+            streams;
+
+	    beforeEach(function() {
+	        setFixtures('<div id="hub-MediaWallView"></div>');
+	        streams = new Hub.StreamManager({main: new MockStream()});
+		});
+
+        it('calls #fitColumns() in constructor if no opts.columns specified', function () {
+            spyOn(MediaWallView.prototype, 'fitColumns');
+
+            $('#hub-MediaWallView').width(220*4); //220px is the default width of content
+	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
+            streams.bind(view);
+            view.render();
+            streams.start();
+            expect(view._autoFitColumns).toBe(true);
+            expect(MediaWallView.prototype.fitColumns).toHaveBeenCalled();
+        });
+
+        it('calls #fitColumns() when window is resized', function () {
+            $('#hub-MediaWallView').width(220*4); //220px is the default width of content
+	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
+            streams.bind(view);
+            view.render();
+            streams.start();
+
+            spyOn(view, 'fitColumns');
+            $(window).trigger('resize');
+            expect(view._autoFitColumns).toBe(true);
+            expect(view.fitColumns).toHaveBeenCalled();
+        });
+
+        it('sets column width proportional to the media wall width', function () {
+            $('#hub-MediaWallView').width(12345);
+	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0), contentWidth: 400 });
+            streams.bind(view);
+            view.render();
+            streams.start();
+            expect(view._columns).toBe(parseInt(12345/400));
         });
     });
 }); 
