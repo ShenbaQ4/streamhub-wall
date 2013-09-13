@@ -78,12 +78,13 @@ define([
     util.inherits(MediaWallView, ListView);
 
 
+    MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
     MediaWallView.prototype.contentContainerClassName = 'content-container';
 
     MediaWallView.prototype.setElement = function (el) {
         ListView.prototype.setElement.call(this, el);
         $(this.el)
-            .addClass('streamhub-media-wall-view')
+            .addClass(this.mediaWallClassName)
             .addClass('streamhub-media-wall-' + this._id);
     };
 
