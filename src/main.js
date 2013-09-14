@@ -3,15 +3,16 @@ define([
     'streamhub-sdk/views/list-view',
     'streamhub-sdk/content/views/content-view',
     'streamhub-sdk/util'
-], function($, ListView, ContentView, Util) {
+], function($, ListView, ContentView, util) {
 
     var MEDIA_WALL_STYLE_EL;
     var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
 	    position:relative; \
 	} \
-	.streamhub-media-wall-view article.content { \
-	    width:320px; \
-	    margin:5px; \
+    .streamhub-media-wall-view .content-container { \
+        position: absolute; \
+        box-sizing: border-box; \
+        padding: 5px; \
 	    -webkit-transition-duration: 1s; \
 	       -moz-transition-duration: 1s; \
 	        -ms-transition-duration: 1s; \
@@ -21,7 +22,11 @@ define([
 	       -moz-transition-property:    -moz-transform, opacity, top, left; \
 	        -ms-transition-property:     -ms-transform, opacity, top, left; \
 	         -o-transition-property:      -o-transform, opacity, top, left; \
-	            transition-property:         transform, opacity, top, left; }";
+	            transition-property:         transform, opacity, top, left; } \
+	.streamhub-media-wall-view article.content { \
+        width: 100%; \
+        border: 1px solid rgba(0,0,0,0.15); \
+        border-radius: 3px; }";
     /**
      * A view that displays Content in a media wall.
      * @param opts {Object} A set of options to config the view with
@@ -33,44 +38,139 @@ define([
      */
     var MediaWallView = function(opts) {
         var self = this;
-        ListView.call(this, opts);
         opts = opts || {};
-        opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
 
-        this.el = opts.el || document.createElement('div');
-        $(this.el).addClass('streamhub-media-wall-view');
-        if (!MEDIA_WALL_STYLE_EL && opts.css) {
-            MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('head');
-        }
+        this._id = new Date().getTime();
+        this._autoFitColumns = true;
+        this._minContentWidth = 220;
+        this._contentWidth = Math.max(opts.contentWidth || 0, this._minContentWidth);
+
+        ListView.call(this, opts);
 
         this.debouncedRelayout = debounce(function () {
             self._relayout.apply(self, arguments);
         }, opts.debounceRelayout || 200);
 
+        this.debouncedFitColumns = debounce(function () {
+            self._fitColumns();
+        }, opts.debounceRelayout || 200);
+ 
         $(window).resize(function() {
             self.relayout();
+            if (self._autoFitColumns) {
+                self.fitColumns();
+            }
         });
+
+        opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
+        if (!MEDIA_WALL_STYLE_EL && opts.css) {
+            MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('head');
+        }
+        if (opts.columns && typeof opts.columns === 'number') {
+            this._columns = opts.columns;
+            this._autoFitColumns = false;
+            this.setColumns(opts.columns);
+        }
+        if (this._autoFitColumns) {
+            this.fitColumns({ force: true });
+        }
     };
-    MediaWallView.prototype = new ListView();
+    util.inherits(MediaWallView, ListView);
+
+
+    MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
+    MediaWallView.prototype.contentContainerClassName = 'content-container';
+
+    MediaWallView.prototype.setElement = function (el) {
+        ListView.prototype.setElement.call(this, el);
+        $(this.el)
+            .addClass(this.mediaWallClassName)
+            .addClass('streamhub-media-wall-' + this._id);
+    };
+
+    MediaWallView.prototype._getWallStyleEl = function () {
+        var $wallStyleEl = $('#wall-style-' + this._id);
+        if ($wallStyleEl) {
+            return $wallStyleEl;
+        }
+    };
+
+    MediaWallView.prototype.setColumns = function (numColumns) {
+        this._columns = numColumns;
+        var $wallStyleEl = this._getWallStyleEl();
+        if ($wallStyleEl) {
+            $wallStyleEl.remove();
+        }
+        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style')
+        this._setContentContainerWidth(100/numColumns + '%');
+        this.relayout();
+    };
+
+    MediaWallView.prototype._setContentContainerWidth = function (width) {
+        var $wallStyleEl = this._getWallStyleEl();
+        if ($wallStyleEl) {
+            $wallStyleEl.remove();
+        }
+        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
+        $wallStyleEl.html('.streamhub-media-wall-'+this._id+' .content-container { width: ' + width + '; }');
+        $wallStyleEl.appendTo('head');
+    };
 
     /**
      * Add a piece of Content to the MediaWallView
      * @param content {Content} A Content model to add to the MediaWallView
      * @return the newly created ContentView
      */
-    MediaWallView.prototype.add = function(content, stream) {
-        var self = this,
-            contentView = ListView.prototype.add.call(this, content)
+    MediaWallView.prototype.add = function(content) {
+        var self = this;
+            contentView = ListView.prototype.add.call(this, content);
 
-        $(contentView.el).on('imageLoaded.hub', function() {
+        contentView.$el.on('imageLoaded.hub', function() {
             self.relayout();
         });
 
         this.relayout();
     };
 
+    MediaWallView.prototype._insert = function (contentView) {
+        var newContentViewIndex,
+            $previousEl;
+
+        newContentViewIndex = this.contentViews.indexOf(contentView);
+
+        var $containerEl = $('<div class="' + this.contentContainerClassName + '"></div>');
+        contentView.$el.wrap($containerEl);
+        var $wrappedEl = contentView.$el.parent();
+
+        if (newContentViewIndex === 0) {
+            // Beginning!
+            $wrappedEl.prependTo(this.el);
+        } else {
+            // Find it's previous contentView and insert new contentView after
+            $previousEl = this.contentViews[newContentViewIndex - 1].$el;
+            $wrappedEl.insertAfter($previousEl.parent('.'+this.contentContainerClassName));
+        }
+    };
+
+    MediaWallView.prototype.fitColumns = function (opts) {
+        opts = opts || {};
+
+        if (opts.force) {
+            this._fitColumns.apply(this, arguments);
+        } else {
+            this.debouncedFitColumns.apply(this, arguments);
+        }
+    };
+
+    MediaWallView.prototype._fitColumns = function (opts) {
+        var containerWidth = $(this.el).innerWidth();
+        var numColumns = parseInt(containerWidth / this._contentWidth) || 1;
+        this.setColumns(numColumns);
+    };
+
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
+
         if (opts.force) {
             this._relayout.apply(this, arguments);
         } else {
@@ -82,14 +182,15 @@ define([
         var columnWidth = 0;
         var columnHeights = [];
         var cols = 0;
-        var containerWidth = Util.innerWidth($(this.el));
+        var containerWidth = $(this.el).innerWidth();
         var maximumY;
+        var self = this;
 
         $.each(this.contentViews, function (index, contentView) {
-            var $contentView = contentView.$el;
+            var $contentContainerEl = contentView.$el.parent('.'+self.contentContainerClassName);
 
             if (columnWidth === 0) {
-                columnWidth = Util.outerWidth($contentView);
+                columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
                 if (columnWidth !== 0) {
                     cols = Math.floor(containerWidth / columnWidth);
                     for (var j = 0; j < cols; j++) {
@@ -113,14 +214,14 @@ define([
             var x = columnWidth * shortCol;
             var y = minimumY;
 
-            $contentView.css({
+            $contentContainerEl.css({
                 position: 'absolute',
                 left: x+'px',
                 top: y+'px'
             });
 
             // apply height to column
-            columnHeights[shortCol] = minimumY + Util.outerHeight($contentView);
+            columnHeights[shortCol] = minimumY + contentView.$el.outerHeight(true);
             if (columnHeights[shortCol] > maximumY) {
                 maximumY = columnHeights[shortCol];
             }
