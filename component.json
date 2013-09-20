@@ -7,7 +7,6 @@
   "dependencies": {
     "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#v1.2.0-build.233",
     "requirejs": "~2.1.5",
-    "jquery": "~1.9.1",
     "requirejs-text": "~2.0.5",
     "jasmine": "*",
     "jasmine-jquery": "*",
