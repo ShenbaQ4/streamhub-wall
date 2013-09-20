@@ -6,13 +6,11 @@
   ],
   "dependencies": {
     "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#v1.2.0-build.233",
-    "requirejs": "~2.1.5",
-    "requirejs-text": "~2.0.5",
+    "requirejs": "~2.1.5"
+  },
+  "devDependencies": {
     "jasmine": "*",
-    "jasmine-jquery": "*",
-    "almond": "~0.2.5",
-    "hogan": "latest",
-    "requirejs-hogan-plugin": "git://github.com/millermedeiros/requirejs-hogan-plugin.git#~0.2.1"
+    "jasmine-jquery": "*"
   },
   "streamhub": {
     "icon": "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbbigHF-302x227.png",
