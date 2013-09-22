@@ -2,8 +2,8 @@ define([
     'streamhub-sdk/jquery',
     'streamhub-sdk/views/list-view',
     'streamhub-sdk/content/views/content-view',
-    'streamhub-sdk/util'
-], function($, ListView, ContentView, util) {
+    'inherits'
+], function($, ListView, ContentView, inherits) {
 
     var MEDIA_WALL_STYLE_EL;
     var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
@@ -87,7 +87,7 @@ define([
             this.fitColumns({ force: true });
         }
     };
-    util.inherits(MediaWallView, ListView);
+    inherits(MediaWallView, ListView);
 
 
     MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
