@@ -113,7 +113,7 @@ describe('A MediaWallView', function () {
 
         it('sets column width proportional to the media wall width', function () {
             $('#hub-MediaWallView').width(12345);
-	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0), contentWidth: 400 });
+	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0), minContentWidth: 400 });
             streams.bind(view);
             view.render();
             streams.start();

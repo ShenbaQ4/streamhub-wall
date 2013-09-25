@@ -42,8 +42,7 @@ define([
 
         this._id = new Date().getTime();
         this._autoFitColumns = true;
-        this._minContentWidth = 220;
-        this._contentWidth = Math.max(opts.contentWidth || 0, this._minContentWidth);
+        this._contentWidth = opts.minContentWidth || 300;
 
         ListView.call(this, opts);
 
