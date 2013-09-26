@@ -27,7 +27,7 @@ define([
         width: 100%; \
         border: 1px solid rgba(0,0,0,0.15); \
         border-radius: 3px; }\
-    .streamhub-media-wall-view article.hub-wall-is-inserting { \
+    .streamhub-media-wall-view .hub-wall-is-inserting { \
         opacity: 0 ; \
 	    -webkit-transition-property: none; \
 	       -moz-transition-property: none; \
@@ -137,7 +137,6 @@ define([
         var self = this,
             contentView = ListView.prototype.add.call(this, content);
 
-        contentView.$el.addClass(this.insertingClassName);
         contentView.$el.on('imageLoaded.hub', function() {
             self.relayout();
         });
@@ -154,6 +153,8 @@ define([
         var $containerEl = $('<div class="' + this.contentContainerClassName + '"></div>');
         contentView.$el.wrap($containerEl);
         var $wrappedEl = contentView.$el.parent();
+
+        $wrappedEl.addClass(this.insertingClassName);
 
         if (newContentViewIndex === 0) {
             // Beginning!
@@ -244,7 +245,7 @@ define([
                 maximumY = columnHeights[shortCol];
             }
 
-            contentView.$el.removeClass(self.insertingClassName);
+            $contentContainerEl.removeClass(self.insertingClassName);
         });
 
         $(this.$listEl).css('height', maximumY + 'px');
