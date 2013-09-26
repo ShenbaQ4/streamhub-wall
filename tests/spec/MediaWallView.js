@@ -80,11 +80,11 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
 
     describe("auto fitting columns", function () {
         var view,
-            streams;
+            stream;
 
 	    beforeEach(function() {
 	        setFixtures('<div id="hub-MediaWallView"></div>');
-	        streams = new Hub.StreamManager({main: new MockStream()});
+	        stream = new MockStream();
 		});
 
         it('calls #fitColumns() in constructor if no opts.columns specified', function () {
@@ -92,9 +92,8 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
 
             $('#hub-MediaWallView').width(220*4); //220px is the default width of content
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
-            streams.bind(view);
             view.render();
-            streams.start();
+            stream.pipe(view);
             expect(view._autoFitColumns).toBe(true);
             expect(MediaWallView.prototype.fitColumns).toHaveBeenCalled();
         });
@@ -102,10 +101,8 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
         it('calls #fitColumns() when window is resized', function () {
             $('#hub-MediaWallView').width(220*4); //220px is the default width of content
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
-            streams.bind(view);
             view.render();
-            streams.start();
-
+            stream.pipe(view);
             spyOn(view, 'fitColumns');
             $(window).trigger('resize');
             expect(view._autoFitColumns).toBe(true);
@@ -115,9 +112,8 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
         it('sets column width proportional to the media wall width', function () {
             $('#hub-MediaWallView').width(12345);
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0), minContentWidth: 400 });
-            streams.bind(view);
             view.render();
-            streams.start();
+            stream.pipe(view);
             expect(view._columns).toBe(parseInt(12345/400));
         });
     });
