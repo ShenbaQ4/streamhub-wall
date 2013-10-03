@@ -1,9 +1,9 @@
 define([
     'streamhub-sdk/jquery',
-    'streamhub-sdk/views/list-view',
+    'streamhub-sdk/content/views/content-list-view',
     'streamhub-sdk/content/views/content-view',
     'inherits'
-], function($, ListView, ContentView, inherits) {
+], function($, ContentListView, ContentView, inherits) {
 
     var MEDIA_WALL_STYLE_EL;
     var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
@@ -57,7 +57,7 @@ define([
         this._autoFitColumns = true;
         this._contentWidth = opts.minContentWidth || 300;
 
-        ListView.call(this, opts);
+        ContentListView.call(this, opts);
 
         this.debouncedRelayout = debounce(function () {
             self._relayout.apply(self, arguments);
@@ -87,14 +87,14 @@ define([
             this.fitColumns({ force: true });
         }
     };
-    inherits(MediaWallView, ListView);
+    inherits(MediaWallView, ContentListView);
 
 
     MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
     MediaWallView.prototype.contentContainerClassName = 'content-container';
 
     MediaWallView.prototype.setElement = function (el) {
-        ListView.prototype.setElement.call(this, el);
+        ContentListView.prototype.setElement.call(this, el);
         $(this.el)
             .addClass(this.mediaWallClassName)
             .addClass('streamhub-media-wall-' + this._id);
@@ -135,7 +135,7 @@ define([
      */
     MediaWallView.prototype.add = function(content) {
         var self = this,
-            contentView = ListView.prototype.add.call(this, content);
+            contentView = ContentListView.prototype.add.call(this, content);
 
         contentView.$el.on('imageLoaded.hub', function() {
             self.relayout();
@@ -148,7 +148,7 @@ define([
         var newContentViewIndex,
             $previousEl;
 
-        newContentViewIndex = this.contentViews.indexOf(contentView);
+        newContentViewIndex = this.views.indexOf(contentView);
 
         var $containerEl = $('<div class="' + this.contentContainerClassName + '"></div>');
         contentView.$el.wrap($containerEl);
@@ -161,7 +161,7 @@ define([
             $wrappedEl.prependTo(this.el);
         } else {
             // Find it's previous contentView and insert new contentView after
-            $previousEl = this.contentViews[newContentViewIndex - 1].$el;
+            $previousEl = this.views[newContentViewIndex - 1].$el;
             $wrappedEl.insertAfter($previousEl.parent('.'+this.contentContainerClassName));
         }
     };
@@ -204,7 +204,7 @@ define([
         var self = this;
 
         var self = this;
-        $.each(this.contentViews, function (index, contentView) {
+        $.each(this.views, function (index, contentView) {
             var $contentContainerEl = contentView.$el.parent('.'+self.contentContainerClassName);
 
             if (columnWidth === 0) {
