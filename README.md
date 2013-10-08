@@ -50,7 +50,7 @@ You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.n
 ### Options
 
 ####```columns```
-The number of columns of content can be specified by the ```columns``` option at construction. This means the content width will adapt to the Media Wall's container size while respecting the specified number of columns. By default, the Media Wall's width divdied by the minimum content width (300px) determines the number of columns.
+The number of columns of content can be specified by the ```columns``` option at construction. This means the content width will adapt to the Media Wall's container size while respecting the specified number of columns. By default, the Media Wall's width divided by the minimum content width (300px) determines the number of columns.
 
         var wallView = new WallView({
             el: document.getElementById('wall'),
