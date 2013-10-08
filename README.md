@@ -44,8 +44,28 @@ Optionally, include some reasonable default CSS rules for StreamHub Content
 4. And bind the streamManager to your wall and start it up
 
         streamManager.bind(wallView).start();
-
+        
 You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.net/59sT9/1/).
+
+### Options
+
+####```columns```
+The number of columns of content can be specified by the ```columns``` option at construction. This means the content width will adapt to the Media Wall's container size while respecting the specified number of columns. By default, the Media Wall's width divdied by the minimum content width (300px) determines the number of columns.
+
+        var wallView = new WallView({
+            el: document.getElementById('wall'),
+            columns: 5
+        });
+
+####```modal```
+By default, when there are attachments for a piece of content the thumbnail can be clicked, revealing a modal that displays the photo/video attachment in its entirety. To disable the modal set the ```modal``` option to ```false```.
+
+        var wallView = new WallView({
+            el: document.getElementById('wall'),
+            columns: 5,
+            modal: false
+        });
+
 
 ## Local Development
 
