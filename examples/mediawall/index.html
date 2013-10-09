@@ -19,17 +19,29 @@
         </script>
         <script>
         require([
+            'streamhub-sdk',
             'streamhub-sdk/collection',
             'streamhub-sdk/content',
-            'streamhub-wall'
-        ],function (Collection, Content, MediaWallView) {
+            'streamhub-wall',
+            'streamhub-sdk/collection/clients/stream-client'
+        ],function (Hub, Collection, Content, MediaWallView, LivefyreStreamClient) {
             var opts = {
-                "network": "labs-t402.fyre.co",
-                "siteId": "303827",
+                /* "network": "labs-t402.fyre.co",
+                "siteId": "286470",
                 // Fast Collection
                 // "articleId": "labs_demo_fire",
-                "articleId": "xbox-0",
-                "environment": "t402.livefyre.com"
+                "articleId": "1111112",
+                "environment": "t402.livefyre.com" */
+                "environment": "fyre",//"t402.livefyre.com"
+                "network": "fyre",//"labs-t402.fyre.co",
+                "siteId": "286470",
+                "articleId": "1111121",
+                "collectionMeta": {
+                    "title": 'Media Wall Example',
+                    "url": 'http://www.fake.com',
+                    "tags": "test,wall"
+                },
+                "signed": false
             };
 
             var view = window.view = new MediaWallView({
@@ -43,10 +55,11 @@
 
             var collection = new Collection(opts);
             collection.createArchive().pipe(view.more);
-
-            setInterval(function () {
-                view.write(new Content({ body: 'blah' }));
-            }, 5000);
+            collection.createUpdater().read();
+            
+/*             setInterval(function () {
+                view.write(new Content({ body: 'poop' }));
+            }, 5000); */
         });
         </script>
     </body>

@@ -49,12 +49,22 @@
             MediaWall = Livefyre.require('streamhub-wall');
 
         var opts = {
-            "network": "labs-t402.fyre.co",
+            /* "network": "labs-t402.fyre.co",
             "siteId": "303827",
             // Fast Collection
             // "articleId": "labs_demo_fire",
             "articleId": "sh_col_51_1366914813",
-            "environment": "t402.livefyre.com"
+            "environment": "t402.livefyre.com" */
+            "environment": "fyre",//"t402.livefyre.com"
+            "network": "fyre",//"labs-t402.fyre.co",
+            "siteId": "286470",
+            "articleId": "1111121",
+            "collectionMeta": {
+                "title": 'Media Wall Example',
+                "url": 'http://www.fake.com',
+                "tags": "test,wall"
+            },
+            "signed": false
         };
         
         var view = window.view = new MediaWall({
