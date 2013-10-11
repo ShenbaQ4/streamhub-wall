@@ -2,45 +2,11 @@ define([
     'streamhub-sdk/jquery',
     'streamhub-sdk/content/views/content-list-view',
     'streamhub-sdk/content/views/content-view',
+    'text!streamhub-wall/style.css',
     'inherits'
-], function($, ContentListView, ContentView, inherits) {
+], function($, ListView, ContentView, MEDIA_WALL_CSS, inherits) {
 
     var MEDIA_WALL_STYLE_EL;
-    var MEDIA_WALL_CSS = ".streamhub-media-wall-view { \
-	    position:relative; \
-	} \
-    .streamhub-media-wall-view .content-container { \
-        position: absolute; \
-        -moz-box-sizing: border-box; \
-        -webkit-box-sizing: border-box; \
-        box-sizing: border-box; \
-        padding: 5px; \
-	    -webkit-transition-duration: 1s; \
-	       -moz-transition-duration: 1s; \
-	        -ms-transition-duration: 1s; \
-	         -o-transition-duration: 1s; \
-	            transition-duration: 1s; \
-	    -webkit-transition-property: -webkit-transform, opacity, top, left; \
-	       -moz-transition-property:    -moz-transform, opacity, top, left; \
-	        -ms-transition-property:     -ms-transform, opacity, top, left; \
-	         -o-transition-property:      -o-transform, opacity, top, left; \
-	            transition-property:         transform, opacity, top, left; } \
-	.streamhub-media-wall-view article.content { \
-        width: 100%; \
-        border: 1px solid rgba(0,0,0,0.15); \
-        border-radius: 3px; }\
-    .streamhub-media-wall-view .hub-wall-is-inserting { \
-        opacity: 0 ; \
-	    -webkit-transition-property: none; \
-	       -moz-transition-property: none; \
-	        -ms-transition-property: none; \
-	         -o-transition-property: none; \
-	            transition-property: none; \
-	    -webkit-transition: opacity 0.3s; \
-	       -moz-transition: opacity 0.3s; \
-	        -ms-transition: opacity 0.3s; \
-	         -o-transition: opacity 0.3s; \
-	            transition: opacity 0.3s; }";
 
     /**
      * A view that displays Content in a media wall.
