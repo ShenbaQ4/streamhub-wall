@@ -46,7 +46,7 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                     return onEnd.callCount;
                 });
                 runs(function () {
-                    expect(view.contentViews.length).toBe(9);
+                    expect(view.views.length).toBe(9);
                 });
             });
         });
@@ -70,10 +70,10 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 view.add(content1);
                 view.add(content2);
             });
-            it("should order .contentViews by .comparator", function () {
-                var sortedContentViews = view.contentViews.slice(0);
+            it("should order .views by .comparator", function () {
+                var sortedContentViews = view.views.slice(0);
                 sortedContentViews.sort(view.comparator);
-                expect(view.contentViews).toEqual(sortedContentViews);
+                expect(view.views).toEqual(sortedContentViews);
             });
         });
     });
