@@ -11,6 +11,8 @@ define([
 	} \
     .streamhub-media-wall-view .content-container { \
         position: absolute; \
+        -moz-box-sizing: border-box; \
+        -webkit-box-sizing: border-box; \
         box-sizing: border-box; \
         padding: 5px; \
 	    -webkit-transition-duration: 1s; \
@@ -114,7 +116,7 @@ define([
             $wallStyleEl.remove();
         }
         $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style')
-        this._setContentContainerWidth(100/numColumns + '%');
+        this._setContentContainerWidth((100/numColumns) + '%');
         this.relayout();
     };
 
