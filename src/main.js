@@ -4,7 +4,7 @@ define([
     'streamhub-sdk/content/views/content-view',
     'text!streamhub-wall/style.css',
     'inherits'
-], function($, ListView, ContentView, MEDIA_WALL_CSS, inherits) {
+], function($, ContentListView, ContentView, MEDIA_WALL_CSS, inherits) {
 
     var MEDIA_WALL_STYLE_EL;
 
