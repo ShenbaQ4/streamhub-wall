@@ -35,7 +35,7 @@
                 "environment": "fyre",//"t402.livefyre.com"
                 "network": "fyre",//"labs-t402.fyre.co",
                 "siteId": "286470",
-                "articleId": "1111121",
+                "articleId": "1111123",
                 "collectionMeta": {
                     "title": 'Media Wall Example',
                     "url": 'http://www.fake.com',
@@ -55,7 +55,7 @@
 
             var collection = new Collection(opts);
             collection.createArchive().pipe(view.more);
-            collection.createUpdater().read();
+            collection.createUpdater().pipe(view);
             
 /*             setInterval(function () {
                 view.write(new Content({ body: 'poop' }));
