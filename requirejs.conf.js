@@ -13,29 +13,32 @@ require.config({
     json: 'lib/requirejs-plugins/src/json'
   },
   packages: [{
-    name: "streamhub-wall",
-    location: "./src"
+    name: 'streamhub-wall',
+    location: './src'
   },{
-    name: "streamhub-sdk",
-    location: "lib/streamhub-sdk/src/"
+    name: 'streamhub-sdk',
+    location: 'lib/streamhub-sdk/src/'
   },{
-    name: "streamhub-sdk/modal",
-    location: "lib/streamhub-sdk/src/modal"
+    name: 'streamhub-sdk/modal',
+    location: 'lib/streamhub-sdk/src/modal'
   },{
-    name: "streamhub-sdk/collection",
+    name: 'streamhub-sdk/collection',
     location: 'lib/streamhub-sdk/src/collection'
   },{
-    name: "streamhub-sdk/auth",
+    name: 'streamhub-sdk/auth',
     location: 'lib/streamhub-sdk/src/auth'
   },{
-    name: "streamhub-sdk/content",
+    name: 'streamhub-sdk/content',
     location: 'lib/streamhub-sdk/src/content'
   },{
     name: 'streamhub-sdk-tests',
     location: 'lib/streamhub-sdk/tests/'
   },{
-    name: "stream",
-    location: "lib/stream/src"
+      name: 'streamhub-sdk/analytics',
+      location: 'lib/streamhub-sdk/src/analytics'
+  },{
+    name: 'stream',
+    location: 'lib/stream/src'
   }],
   shim: {
     jquery: {
