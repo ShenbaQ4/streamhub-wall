@@ -10,22 +10,21 @@ The quickest way to use streamhub-wall is to use the built version hosted on Liv
 
 streamhub-wall depends on [streamhub-sdk](https://github.com/livefyre/streamhub-sdk). Ensure it's been included in your page.
 
-	<script src="http://cdn.livefyre.com/libs/sdk/v1.1.0-build.212/streamhub-sdk.min.gz.js"></script>
+	<script src="http://cdn.livefyre.com/libs/sdk/v2.0.3/streamhub-sdk.min.js"></script>
 
 Include streamhub-wall too.
 
-	<script src="http://cdn.livefyre.com/libs/apps/Livefyre/streamhub-wall/v1.0.0-build.33/streamhub-wall.min.js"></script>
+	<script src="http://cdn.livefyre.com/libs/apps/Livefyre/streamhub-wall/v2.0.0-build.85/streamhub-wall.min.js"></script>
 	
 Optionally, include some reasonable default CSS rules for StreamHub Content
 
-    <link rel="stylesheet" href="http://cdn.livefyre.com/libs/sdk/v1.1.0-build.212/streamhub-sdk.gz.css" />
+    <link rel="stylesheet" href="http://cdn.livefyre.com/libs/sdk/v2.0.3/streamhub-sdk.min.css" />
 
 ### Usage
 
-1. Require streamhub-sdk and streamhub-wall
+1. Require streamhub-wall
 
-        var Hub = Livefyre.require('streamhub-sdk'),
-            WallView = Livefyre.require('streamhub-wall');
+        var WallView = Livefyre.require('streamhub-wall');
     
 2. Create a WallView, passing the DOMElement to render in
 
@@ -33,21 +32,32 @@ Optionally, include some reasonable default CSS rules for StreamHub Content
             el: document.getElementById('wall')
         });
     
-3. An empty wall is no fun, so use the SDK to create a StreamManager for a Livefyre Collection
+3. An empty wall is no fun, so use the SDK to create a Livefyre Collection
 
-        var streamManager = Hub.StreamManager.create.livefyreStreams({
+        var Collection = Livefyre.require('streamhub-sdk/collection')
+        var collection = new Collection({
             network: "labs.fyre.co",
             siteId: 315833,
             articleId: 'example'
         });
     
-4. And bind the streamManager to your wall and start it up
+4. Pipe the Collection to your WallView
 
-        streamManager.bind(wallView).start();
+        collection.pipe(wallView);
         
-You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.net/59sT9/1/).
+You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.net/kwwTf/4/).
 
 ### Options
+
+####```minContentWidth```
+The Media Wall will choose an appropriate number of columns depending on the width of its
+container element, ensuring that each column is at least this many pixels wide. Don't use
+with the `columns` option.
+
+        var wallView = new WallView({
+            el: document.getElementById('wall'),
+            minContentWidth: 300
+        });
 
 ####```columns```
 The number of columns of content can be specified by the ```columns``` option at construction. This means the content width will adapt to the Media Wall's container size while respecting the specified number of columns. By default, the Media Wall's width divided by the minimum content width (300px) determines the number of columns.
