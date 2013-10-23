@@ -45,7 +45,7 @@ Optionally, include some reasonable default CSS rules for StreamHub Content
 
         collection.pipe(wallView);
         
-You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.net/kwwTf/4/).
+You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.net/kwwTf/6/).
 
 ### Options
 
