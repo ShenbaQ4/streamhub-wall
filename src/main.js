@@ -81,7 +81,7 @@ define([
         if ($wallStyleEl) {
             $wallStyleEl.remove();
         }
-        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style')
+        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
         this._setContentContainerWidth((100/numColumns) + '%');
         this.relayout();
     };
@@ -110,6 +110,19 @@ define([
         });
 
         this.relayout();
+    };
+    
+    /**
+     * Remove a View from this ListView
+     * @param content {Content|ContentView} The ContentView or Content to be removed
+     * @returns {boolean} true if Content was removed, else false
+     */
+    MediaWallView.prototype.remove = function (view) {
+        var retVal = ContentListView.prototype.remove.call(this, view);
+        if (retVal) {
+            this.relayout();
+        }
+        return retVal;
     };
 
     MediaWallView.prototype._insert = function (contentView) {
@@ -146,7 +159,7 @@ define([
 
     MediaWallView.prototype._fitColumns = function (opts) {
         var containerWidth = $(this.el).innerWidth();
-        var numColumns = parseInt(containerWidth / this._contentWidth) || 1;
+        var numColumns = parseInt(containerWidth / this._contentWidth, 10) || 1;
         this.setColumns(numColumns);
     };
 
@@ -169,7 +182,6 @@ define([
         var cols = 0;
         var containerWidth = $(this.el).innerWidth();
         var maximumY;
-        var self = this;
 
         var self = this;
         $.each(this.views, function (index, contentView) {
