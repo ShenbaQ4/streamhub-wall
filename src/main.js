@@ -63,9 +63,10 @@ define([
 
     MediaWallView.prototype.setElement = function (el) {
         ContentListView.prototype.setElement.call(this, el);
-        $(this.el)
+        this.$el
             .addClass(this.mediaWallClassName)
-            .addClass('streamhub-media-wall-' + this._id);
+            .addClass('streamhub-media-wall-' + this._id)
+            .on('removeContentView.hub', this.relayout.bind(this, {}));
     };
 
     MediaWallView.prototype._getWallStyleEl = function () {
@@ -81,7 +82,7 @@ define([
         if ($wallStyleEl) {
             $wallStyleEl.remove();
         }
-        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style')
+        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
         this._setContentContainerWidth((100/numColumns) + '%');
         this.relayout();
     };

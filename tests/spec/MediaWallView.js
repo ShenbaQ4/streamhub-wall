@@ -76,6 +76,15 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 expect(view.views).toEqual(sortedContentViews);
             });
         });
+
+        it('calls .relayout when a ContentView is removed', function () {
+            var wallView = new MediaWallView();
+            spyOn(wallView, 'relayout').andCallThrough();
+            var content = new Content('woah');
+            wallView.add(content);
+            wallView.getContentView(content).remove();
+            expect(wallView.relayout).toHaveBeenCalled();
+        });
     });
 
     describe("auto fitting columns", function () {

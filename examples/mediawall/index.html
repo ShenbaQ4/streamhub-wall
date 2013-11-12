@@ -41,12 +41,8 @@
                 showMore: 2
             });
 
-            var collection = new Collection(opts);
-            collection.createArchive().pipe(view.more);
-
-            setInterval(function () {
-                view.write(new Content({ body: 'blah' }));
-            }, 5000);
+            var collection = window.collection = new Collection(opts);
+            collection.pipe(view);
         });
         </script>
     </body>
