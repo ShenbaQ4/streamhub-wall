@@ -65,8 +65,7 @@ define([
         ContentListView.prototype.setElement.call(this, el);
         this.$el
             .addClass(this.mediaWallClassName)
-            .addClass('streamhub-media-wall-' + this._id)
-            .on('removeContentView.hub', this.relayout.bind(this, {}));
+            .addClass('streamhub-media-wall-' + this._id);
     };
 
     MediaWallView.prototype._getWallStyleEl = function () {
