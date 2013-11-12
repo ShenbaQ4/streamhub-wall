@@ -24,6 +24,7 @@ define([
         this._id = new Date().getTime();
         this._autoFitColumns = true;
         this._contentWidth = opts.minContentWidth || 300;
+        this._columnInsertIndex = 0;
 
         ContentListView.call(this, opts);
 
@@ -94,6 +95,18 @@ define([
         $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
         $wallStyleEl.html('.streamhub-media-wall-'+this._id+' .content-container { width: ' + width + '; }');
         $wallStyleEl.appendTo('head');
+
+        this._getColumnWidth();
+    };
+
+    MediaWallView.prototype._getColumnWidth = function () {
+        var $contentContainerEl = this.$el.find('.'+this.contentContainerClassName);
+        if ($contentContainerEl.length) {
+            this._columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
+            console.log(this._columnWidth);
+            return this._columnWidth;
+        }
+        return 0;
     };
 
     /**
@@ -164,16 +177,48 @@ define([
 
     MediaWallView.prototype._relayout = function(opts) {
         opts = opts || {};
+
+        this.isotopeLayout({
+            translate: false,
+            hardwareAccelerate: false
+        });
+        //this.columnBasedLayout();
+    };
+
+    function columnBasedLayout(opts) {
+        // Round-robin through columns, prepending each column with the next
+        // available view
         var columnWidth = 0;
         var columnHeights = [];
         var cols = 0;
         var containerWidth = $(this.el).innerWidth();
         var maximumY;
-        var self = this;
 
-        var self = this;
         $.each(this.views, function (index, contentView) {
-            var $contentContainerEl = contentView.$el.parent('.'+self.contentContainerClassName);
+            var $contentContainerEl = contentView.$el.parent('.'+this.contentContainerClassName);
+
+            if (columnWidth === 0) {
+                columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
+                if (columnWidth !== 0) {
+                    cols = Math.floor(containerWidth / columnWidth);
+                    for (var j = 0; j < cols; j++) {
+                        columnHeights[j] = 0;
+                    }
+                }
+            }
+
+        }.bind(this));
+    };
+
+    MediaWallView.prototype.isotopeLayout = function (opts) {
+        var columnWidth = 0;
+        var columnHeights = [];
+        var cols = 0;
+        var containerWidth = $(this.el).innerWidth();
+        var maximumY;
+
+        $.each(this.views, function (index, contentView) {
+            var $contentContainerEl = contentView.$el.parent('.'+this.contentContainerClassName);
 
             if (columnWidth === 0) {
                 columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
@@ -200,11 +245,20 @@ define([
             var x = columnWidth * shortCol;
             var y = minimumY;
 
-            $contentContainerEl.css({
-                position: 'absolute',
-                left: x+'px',
-                top: y+'px'
-            });
+            var css = { position: 'absolute' };
+            if (opts.translate) {
+                css.left = 0+'px';
+                css.top = 0+'px';
+                css['-webkit-transform'] = 'translate('+x+'px, '+y+'px)'
+            } else {
+                css.left = x+'px';
+                css.top = y+'px';
+            }
+            if (opts.hardwareAccelerate) {
+                css['-webkit-transform'] = css['-webkit-transform'] + ' rotateY(0deg)';
+            }
+
+            $contentContainerEl.css(css);
 
             // apply height to column
             columnHeights[shortCol] = minimumY + contentView.$el.outerHeight(true);
@@ -213,10 +267,10 @@ define([
                 maximumY = columnHeights[shortCol];
             }
 
-            $contentContainerEl.removeClass(self.insertingClassName);
-        });
+            $contentContainerEl.removeClass(this.insertingClassName);
 
-        $(this.$listEl).css('height', maximumY + 'px');
+            $(this.$listEl).css('height', maximumY + 'px');
+        }.bind(this));
     };
 
     /**
