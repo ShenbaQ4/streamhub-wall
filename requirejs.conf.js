@@ -1,6 +1,7 @@
 require.config({
   paths: {
     jquery: 'lib/jquery/jquery',
+    'jquery-requestAnimationFrame': 'lib/jquery-requestAnimationFrame/src/jquery.requestAnimationFrame',
     text: 'lib/requirejs-text/text',
     base64: 'lib/base64/base64',
     hogan: 'lib/hogan/web/builds/2.0.0/hogan-2.0.0.amd',
@@ -50,6 +51,10 @@ require.config({
     },
     'jasmine-jquery': {
         deps: ['jquery', 'jasmine']
+    },
+    'jquery-requestAnimationFrame': {
+        exports: '$',
+        deps: ['jquery']
     }
   }
 });

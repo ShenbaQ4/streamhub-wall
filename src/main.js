@@ -3,7 +3,8 @@ define([
     'streamhub-sdk/content/views/content-list-view',
     'streamhub-sdk/content/views/content-view',
     'text!streamhub-wall/style.css',
-    'inherits'
+    'inherits',
+    'jquery-requestAnimationFrame'
 ], function($, ContentListView, ContentView, MEDIA_WALL_CSS, inherits) {
 
     var MEDIA_WALL_STYLE_EL;
