@@ -24,7 +24,10 @@ define([
         this._id = new Date().getTime();
         this._autoFitColumns = true;
         this._contentWidth = opts.minContentWidth || 300;
-        this._columnInsertIndex = 0;
+        this._columnViews = [];
+        this._columnAppendIndex = 0;
+        this._columnPrependIndex = 0;
+        this._containerInnerWidth = 0;
 
         ContentListView.call(this, opts);
 
@@ -38,7 +41,8 @@ define([
  
         $(window).resize(function() {
             self.relayout();
-            if (self._autoFitColumns) {
+            if (self._autoFitColumns && self._containerInnerWidth != self.$el.innerWidth()) {
+            console.log('resize fit cols');
                 self.fitColumns();
             }
         });
@@ -48,7 +52,6 @@ define([
             MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('head');
         }
         if (opts.columns && typeof opts.columns === 'number') {
-            this._columns = opts.columns;
             this._autoFitColumns = false;
             this.setColumns(opts.columns);
         }
@@ -60,14 +63,8 @@ define([
 
 
     MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
-    MediaWallView.prototype.contentContainerClassName = 'content-container';
-
-    MediaWallView.prototype.setElement = function (el) {
-        ContentListView.prototype.setElement.call(this, el);
-        this.$el
-            .addClass(this.mediaWallClassName)
-            .addClass('streamhub-media-wall-' + this._id);
-    };
+    MediaWallView.prototype.columnClassName = 'hub-wall-column';
+    MediaWallView.prototype.insertingClassName = 'hub-wall-is-inserting';
 
     MediaWallView.prototype._getWallStyleEl = function () {
         var $wallStyleEl = $('#wall-style-' + this._id);
@@ -76,37 +73,66 @@ define([
         }
     };
 
-    MediaWallView.prototype.setColumns = function (numColumns) {
-        this._columns = numColumns;
+    MediaWallView.prototype._setColumnWidth = function (width) {
         var $wallStyleEl = this._getWallStyleEl();
         if ($wallStyleEl) {
             $wallStyleEl.remove();
         }
         $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
-        this._setContentContainerWidth((100/numColumns) + '%');
-        this.relayout();
-    };
-
-    MediaWallView.prototype._setContentContainerWidth = function (width) {
-        var $wallStyleEl = this._getWallStyleEl();
-        if ($wallStyleEl) {
-            $wallStyleEl.remove();
-        }
-        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
-        $wallStyleEl.html('.streamhub-media-wall-'+this._id+' .content-container { width: ' + width + '; }');
+        $wallStyleEl.html('.streamhub-media-wall-'+this._id+' .hub-wall-column { width: ' + width + '; }');
         $wallStyleEl.appendTo('head');
 
-        this._getColumnWidth();
+        return this._getColumnWidth();
     };
 
     MediaWallView.prototype._getColumnWidth = function () {
-        var $contentContainerEl = this.$el.find('.'+this.contentContainerClassName);
+        var $contentContainerEl = this.$el.find('.'+this.columnClassName);
         if ($contentContainerEl.length) {
             this._columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
-            console.log(this._columnWidth);
             return this._columnWidth;
         }
         return 0;
+    };
+
+    MediaWallView.prototype.setElement = function (el) {
+        ContentListView.prototype.setElement.call(this, el);
+        this.$el
+            .addClass(this.mediaWallClassName)
+            .addClass('streamhub-media-wall-' + this._id);
+    };
+
+    MediaWallView.prototype.setColumns = function (numColumns) {
+        var $wallStyleEl = this._getWallStyleEl();
+        if ($wallStyleEl) {
+            $wallStyleEl.remove();
+        }
+        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
+        this._setColumnWidth((100/numColumns) + '%');
+
+        for (var i=0; i < numColumns; i++) {
+            var contentListView = new ContentListView();
+            this._columnViews.push(contentListView);
+            contentListView.$el.addClass(this.columnClassName);
+            this.$listEl.append(contentListView.$el);
+        }
+
+        this.relayout();
+    };
+
+    MediaWallView.prototype.fitColumns = function (opts) {
+        opts = opts || {};
+
+        if (opts.force) {
+            this._fitColumns.apply(this, arguments);
+        } else {
+            this.debouncedFitColumns.apply(this, arguments);
+        }
+    };
+
+    MediaWallView.prototype._fitColumns = function (opts) {
+        this._containerInnerWidth = $(this.el).innerWidth();
+        var numColumns = parseInt(this._containerInnerWidth / this._contentWidth, 10) || 1;
+        this.setColumns(numColumns);
     };
 
     /**
@@ -114,13 +140,14 @@ define([
      * @param content {Content} A Content model to add to the MediaWallView
      * @return the newly created ContentView
      */
-    MediaWallView.prototype.add = function(content) {
+    MediaWallView.prototype.add = function(content, opts) {
         var self = this,
-            contentView = ContentListView.prototype.add.call(this, content);
+            contentView = ContentListView.prototype.add.call(this, content, opts);
 
-        contentView.$el.on('imageLoaded.hub', function() {
-            self.relayout();
-        });
+        //TODO(ryanc): Should no longer need this if using browser positioning
+        //contentView.$el.on('imageLoaded.hub', function() {
+        //    self.relayout();
+        //});
 
         this.relayout();
     };
@@ -138,45 +165,29 @@ define([
         return retVal;
     };
 
-    MediaWallView.prototype._insert = function (contentView) {
+    MediaWallView.prototype._insert = function (contentView, opts) {
+        opts = opts || {};
         var newContentViewIndex,
             $previousEl;
 
         newContentViewIndex = this.views.indexOf(contentView);
 
-        var $containerEl = $('<div class="' + this.contentContainerClassName + '"></div>');
-        contentView.$el.wrap($containerEl);
-        var $wrappedEl = contentView.$el.parent();
-
-        $wrappedEl.addClass(this.insertingClassName);
-
-        if (newContentViewIndex === 0) {
-            // Beginning!
-            $wrappedEl.prependTo(this.el);
+        var targetColumnView;
+        if (opts.append === true && newContentViewIndex > 0) {
+            var targetColumnView = this._columnViews[this._columnAppendIndex];
+            targetColumnView.$el.append(contentView.$el);
+            this._columnAppendIndex++;
+            this._columnAppendIndex = this._columnAppendIndex == this._columnViews.length ? 0 : this._columnAppendIndex;
         } else {
-            // Find it's previous contentView and insert new contentView after
-            $previousEl = this.views[newContentViewIndex - 1].$el;
-            $wrappedEl.insertAfter($previousEl.parent('.'+this.contentContainerClassName));
+            // New content goes to the next available column for insertion
+            var targetColumnView = this._columnViews[this._columnPrependIndex];
+            targetColumnView.$el.prepend(contentView.$el);
+            this._columnPrependIndex++;
+            this._columnPrependIndex = this._columnPrependIndex == this._columnViews.length ? 0 : this._columnPrependIndex;
         }
+        //contentView.$el.addClass(this.insertingClassName);
+        contentView.$el.slideDown();
     };
-
-    MediaWallView.prototype.fitColumns = function (opts) {
-        opts = opts || {};
-
-        if (opts.force) {
-            this._fitColumns.apply(this, arguments);
-        } else {
-            this.debouncedFitColumns.apply(this, arguments);
-        }
-    };
-
-    MediaWallView.prototype._fitColumns = function (opts) {
-        var containerWidth = $(this.el).innerWidth();
-        var numColumns = parseInt(containerWidth / this._contentWidth, 10) || 1;
-        this.setColumns(numColumns);
-    };
-
-    MediaWallView.prototype.insertingClassName = 'hub-wall-is-inserting';
 
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
@@ -191,16 +202,14 @@ define([
     MediaWallView.prototype._relayout = function(opts) {
         opts = opts || {};
 
-        this.isotopeLayout({
-            translate: false,
-            hardwareAccelerate: false
-        });
-        //this.columnBasedLayout();
+        //this.columnBasedLayout(opts);
     };
 
-    function columnBasedLayout(opts) {
+    MediaWallView.prototype.columnBasedLayout = function (opts) {
         // Round-robin through columns, prepending each column with the next
         // available view
+        opts = opts || {};
+
         var columnWidth = 0;
         var columnHeights = [];
         var cols = 0;
@@ -208,7 +217,7 @@ define([
         var maximumY;
 
         $.each(this.views, function (index, contentView) {
-            var $contentContainerEl = contentView.$el.parent('.'+this.contentContainerClassName);
+            var $contentContainerEl = contentView.$el.parent('.'+this.columnClassName);
 
             if (columnWidth === 0) {
                 columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
@@ -231,7 +240,7 @@ define([
         var maximumY;
 
         $.each(this.views, function (index, contentView) {
-            var $contentContainerEl = contentView.$el.parent('.'+this.contentContainerClassName);
+            var $contentContainerEl = contentView.$el.parent('.'+this.columnClassName);
 
             if (columnWidth === 0) {
                 columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
