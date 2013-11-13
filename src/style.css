@@ -12,7 +12,16 @@
     width: 100%;
     border: 1px solid rgba(0,0,0,0.15);
     border-radius: 3px;
-    display: none;
+    overflow-y: hidden;
+    -webkit-transform: translateY(-100%) rotateY(0deg);
+    transform: translateY(-100%) rotateY(0deg);
 }
 .streamhub-media-wall-view article.hub-wall-is-inserting {
+    -webkit-transform: translateY(0px) rotateY(0deg);
+    transform: translateY(0px) rotateY(0deg);
+    -webkit-transition: -webkit-transform 1s;
+       -moz-transition: -moz-transform 1s;
+        -ms-transition: -ms-transform 1s;
+         -o-transition: -o-transform 1s;
+            transition: transform 1s;
 }

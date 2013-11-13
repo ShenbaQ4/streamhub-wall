@@ -3,8 +3,7 @@ define([
     'streamhub-sdk/content/views/content-list-view',
     'streamhub-sdk/content/views/content-view',
     'text!streamhub-wall/style.css',
-    'inherits',
-    'jquery-requestAnimationFrame'
+    'inherits'
 ], function($, ContentListView, ContentView, MEDIA_WALL_CSS, inherits) {
 
     var MEDIA_WALL_STYLE_EL;
@@ -186,8 +185,7 @@ define([
             this._columnPrependIndex++;
             this._columnPrependIndex = this._columnPrependIndex == this._columnViews.length ? 0 : this._columnPrependIndex;
         }
-        //contentView.$el.addClass(this.insertingClassName);
-        contentView.$el.slideDown();
+        setTimeout(function () { contentView.$el.addClass(this.insertingClassName); }.bind(this), 1);
     };
 
     MediaWallView.prototype.relayout = function (opts) {
