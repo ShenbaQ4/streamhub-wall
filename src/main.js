@@ -65,6 +65,7 @@ define([
     MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
     MediaWallView.prototype.columnClassName = 'hub-wall-column';
     MediaWallView.prototype.insertingClassName = 'hub-wall-is-inserting';
+    MediaWallView.prototype.contentContainerClassName = 'hub-content-container';
 
     MediaWallView.prototype._getWallStyleEl = function () {
         var $wallStyleEl = $('#wall-style-' + this._id);
@@ -168,24 +169,29 @@ define([
     MediaWallView.prototype._insert = function (contentView, opts) {
         opts = opts || {};
         var newContentViewIndex,
-            $previousEl;
+            $previousEl,
+            $wrappedEl;
 
         newContentViewIndex = this.views.indexOf(contentView);
+
+        var $containerEl = $('<div class="'+this.contentContainerClassName+'"></div>');
+        contentView.$el.wrap($containerEl);
+        $wrappedEl = contentView.$el.parent();
 
         var targetColumnView;
         if (opts.append === true && newContentViewIndex > 0) {
             var targetColumnView = this._columnViews[this._columnAppendIndex];
-            targetColumnView.$el.append(contentView.$el);
+            targetColumnView.$el.append($wrappedEl);
             this._columnAppendIndex++;
             this._columnAppendIndex = this._columnAppendIndex == this._columnViews.length ? 0 : this._columnAppendIndex;
         } else {
             // New content goes to the next available column for insertion
             var targetColumnView = this._columnViews[this._columnPrependIndex];
-            targetColumnView.$el.prepend(contentView.$el);
+            targetColumnView.$el.prepend($wrappedEl);
             this._columnPrependIndex++;
             this._columnPrependIndex = this._columnPrependIndex == this._columnViews.length ? 0 : this._columnPrependIndex;
         }
-        setTimeout(function () { contentView.$el.addClass(this.insertingClassName); }.bind(this), 1);
+        setTimeout(function () { $wrappedEl.addClass(this.insertingClassName); }.bind(this), 1);
     };
 
     MediaWallView.prototype.relayout = function (opts) {
