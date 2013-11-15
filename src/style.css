@@ -1,5 +1,6 @@
 .streamhub-media-wall-view {
     position:relative;
+    overflow: scroll;
 }
 .streamhub-media-wall-view .hub-wall-column {
     display: inline-block;
@@ -17,6 +18,7 @@
 }
 .streamhub-media-wall-view .hub-content-container {
     max-height: 0px;
+    overflow-y: hidden;
 }
 .streamhub-media-wall-view .hub-wall-is-inserting {
     max-height: 9999px;

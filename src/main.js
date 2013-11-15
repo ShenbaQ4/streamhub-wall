@@ -28,8 +28,7 @@ define([
         this._columnAppendIndex = 0;
         this._columnPrependIndex = 0;
         this._containerInnerWidth = 0;
-
-        ContentListView.call(this, opts);
+        this._maxVisibleItems = opts.maxVisibleItems || 20;
 
         this.debouncedRelayout = debounce(function () {
             self._relayout.apply(self, arguments);
@@ -38,6 +37,8 @@ define([
         this.debouncedFitColumns = debounce(function () {
             self._fitColumns();
         }, opts.debounceRelayout || 200);
+        
+        ContentListView.call(this, opts);
  
         $(window).resize(function() {
             self.relayout();
@@ -64,8 +65,6 @@ define([
 
     MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
     MediaWallView.prototype.columnClassName = 'hub-wall-column';
-    MediaWallView.prototype.insertingClassName = 'hub-wall-is-inserting';
-    MediaWallView.prototype.contentContainerClassName = 'hub-content-container';
 
     MediaWallView.prototype._getWallStyleEl = function () {
         var $wallStyleEl = $('#wall-style-' + this._id);
@@ -111,7 +110,7 @@ define([
         this._setColumnWidth((100/numColumns) + '%');
 
         for (var i=0; i < numColumns; i++) {
-            var contentListView = new ContentListView();
+            var contentListView = new ContentListView({ maxVisibleItems: this._maxVisibleItems/numColumns });
             this._columnViews.push(contentListView);
             contentListView.$el.addClass(this.columnClassName);
             this.$listEl.append(contentListView.$el);
@@ -142,15 +141,28 @@ define([
      * @return the newly created ContentView
      */
     MediaWallView.prototype.add = function(content, opts) {
-        var self = this,
-            contentView = ContentListView.prototype.add.call(this, content, opts);
+        opts = opts || {};
+        var self = this;
+
+        var targetColumnView;
+        if (opts.append === true && newContentViewIndex > 0) {
+            var targetColumnView = this._columnViews[this._columnAppendIndex];
+            this._columnAppendIndex++;
+            this._columnAppendIndex = this._columnAppendIndex == this._columnViews.length ? 0 : this._columnAppendIndex;
+        } else {
+            // New content goes to the next available column for insertion
+            var targetColumnView = this._columnViews[this._columnPrependIndex];
+            this._columnPrependIndex++;
+            this._columnPrependIndex = this._columnPrependIndex == this._columnViews.length ? 0 : this._columnPrependIndex;
+        }
+        targetColumnView.write(content)
 
         //TODO(ryanc): Should no longer need this if using browser positioning
         //contentView.$el.on('imageLoaded.hub', function() {
         //    self.relayout();
         //});
 
-        this.relayout();
+        //this.relayout();
     };
     
     /**
@@ -164,34 +176,6 @@ define([
             this.relayout();
         }
         return retVal;
-    };
-
-    MediaWallView.prototype._insert = function (contentView, opts) {
-        opts = opts || {};
-        var newContentViewIndex,
-            $previousEl,
-            $wrappedEl;
-
-        newContentViewIndex = this.views.indexOf(contentView);
-
-        var $containerEl = $('<div class="'+this.contentContainerClassName+'"></div>');
-        contentView.$el.wrap($containerEl);
-        $wrappedEl = contentView.$el.parent();
-
-        var targetColumnView;
-        if (opts.append === true && newContentViewIndex > 0) {
-            var targetColumnView = this._columnViews[this._columnAppendIndex];
-            targetColumnView.$el.append($wrappedEl);
-            this._columnAppendIndex++;
-            this._columnAppendIndex = this._columnAppendIndex == this._columnViews.length ? 0 : this._columnAppendIndex;
-        } else {
-            // New content goes to the next available column for insertion
-            var targetColumnView = this._columnViews[this._columnPrependIndex];
-            targetColumnView.$el.prepend($wrappedEl);
-            this._columnPrependIndex++;
-            this._columnPrependIndex = this._columnPrependIndex == this._columnViews.length ? 0 : this._columnPrependIndex;
-        }
-        setTimeout(function () { $wrappedEl.addClass(this.insertingClassName); }.bind(this), 1);
     };
 
     MediaWallView.prototype.relayout = function (opts) {

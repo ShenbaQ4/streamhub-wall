@@ -44,10 +44,12 @@
             var collection = new Collection(opts);
             collection.createArchive().pipe(view.more);
 
+            var count = 50
             setInterval(function () {
                 var rand = Math.floor((Math.random()*2)+1);
                 var body = rand == 1 ? 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere porttitor diam sit amet laoreet. Etiam eu eleifend odio.' : 'Lorem ipsum dolor sit amet, consectetur adipiscing elit. Integer posuere porttitor diam sit amet laoreet. Etiam eu eleifend odio. Suspendisse convallis molestie euismod. Aenean rutrum sagittis dui nec pharetra.';
-                view.write(new Content({ body: body }));
+                if (count > 0) { view.write(new Content({ body: body })); }
+                count--;
             }, 1000);
         });
         </script>
