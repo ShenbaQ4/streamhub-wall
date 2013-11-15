@@ -37,7 +37,7 @@ define([
         this.debouncedFitColumns = debounce(function () {
             self._fitColumns();
         }, opts.debounceRelayout || 200);
-        
+
         ContentListView.call(this, opts);
  
         $(window).resize(function() {
@@ -282,6 +282,13 @@ define([
 
             $(this.$listEl).css('height', maximumY + 'px');
         }.bind(this));
+    };
+
+    MediaWallView.prototype.showMore = function (numToShow) {
+        for (var i=0; i < this._columnViews.length; i++) {
+            this._columnViews[i].bounded(false);
+        }
+        ContentListView.prototype.showMore.call(this, numToShow);
     };
 
     /**
