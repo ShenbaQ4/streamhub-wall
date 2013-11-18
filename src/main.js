@@ -42,7 +42,6 @@ define([
  
         $(window).resize(function() {
             if (self._autoFitColumns && self._containerInnerWidth != self.$el.innerWidth()) {
-                console.log('resize fit cols');
                 self.fitColumns();
             }
         });
