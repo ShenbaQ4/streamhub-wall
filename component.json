@@ -6,8 +6,7 @@
   ],
   "dependencies": {
     "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.3.0",
-    "requirejs": "~2.1.5",
-    "jquery-requestAnimationFrame": "git://github.com/gnarf/jquery-requestAnimationFrame.git"
+    "requirejs": "~2.1.5"
   },
   "devDependencies": {
     "jasmine": "*",
