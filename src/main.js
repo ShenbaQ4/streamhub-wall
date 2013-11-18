@@ -41,9 +41,8 @@ define([
         ContentListView.call(this, opts);
  
         $(window).resize(function() {
-            self.relayout();
             if (self._autoFitColumns && self._containerInnerWidth != self.$el.innerWidth()) {
-            console.log('resize fit cols');
+                console.log('resize fit cols');
                 self.fitColumns();
             }
         });
@@ -132,7 +131,22 @@ define([
     MediaWallView.prototype._fitColumns = function (opts) {
         this._containerInnerWidth = $(this.el).innerWidth();
         var numColumns = parseInt(this._containerInnerWidth / this._contentWidth, 10) || 1;
+        this._clearColumns();
         this.setColumns(numColumns);
+    };
+
+    MediaWallView.prototype._clearColumns = function () {
+        var contentViews = [];
+        for (var i=0; i < this._columnViews.length; i++) {
+            var columnView = this._columnViews[i];
+            contentViews = contentViews.concat(columnView.views);
+            columnView.destroy();
+        }
+        this.views = contentViews;
+        if (this.comparator) {
+            this.views.sort(this.comparator);
+        }
+        this._columnViews = [];
     };
 
     /**
@@ -155,14 +169,7 @@ define([
             this._columnPrependIndex++;
             this._columnPrependIndex = this._columnPrependIndex == this._columnViews.length ? 0 : this._columnPrependIndex;
         }
-        targetColumnView.write(content)
-
-        //TODO(ryanc): Should no longer need this if using browser positioning
-        //contentView.$el.on('imageLoaded.hub', function() {
-        //    self.relayout();
-        //});
-
-        //this.relayout();
+        targetColumnView.write(content);
     };
     
     /**
@@ -180,7 +187,6 @@ define([
 
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
-
         if (opts.force) {
             this._relayout.apply(this, arguments);
         } else {
@@ -190,8 +196,7 @@ define([
 
     MediaWallView.prototype._relayout = function(opts) {
         opts = opts || {};
-
-        //this.columnBasedLayout(opts);
+        this.columnBasedLayout(opts);
     };
 
     MediaWallView.prototype.columnBasedLayout = function (opts) {
@@ -199,89 +204,12 @@ define([
         // available view
         opts = opts || {};
 
-        var columnWidth = 0;
-        var columnHeights = [];
-        var cols = 0;
-        var containerWidth = $(this.el).innerWidth();
-        var maximumY;
-
-        $.each(this.views, function (index, contentView) {
-            var $contentContainerEl = contentView.$el.parent('.'+this.columnClassName);
-
-            if (columnWidth === 0) {
-                columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
-                if (columnWidth !== 0) {
-                    cols = Math.floor(containerWidth / columnWidth);
-                    for (var j = 0; j < cols; j++) {
-                        columnHeights[j] = 0;
-                    }
-                }
-            }
-
-        }.bind(this));
-    };
-
-    MediaWallView.prototype.isotopeLayout = function (opts) {
-        var columnWidth = 0;
-        var columnHeights = [];
-        var cols = 0;
-        var containerWidth = $(this.el).innerWidth();
-        var maximumY;
-
-        $.each(this.views, function (index, contentView) {
-            var $contentContainerEl = contentView.$el.parent('.'+this.columnClassName);
-
-            if (columnWidth === 0) {
-                columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
-                if (columnWidth !== 0) {
-                    cols = Math.floor(containerWidth / columnWidth);
-                    for (var j = 0; j < cols; j++) {
-                        columnHeights[j] = 0;
-                    }
-                }
-            }
-            // get the minimum Y value from the columns
-            var minimumY = Math.min.apply( Math, columnHeights );
-            maximumY = Math.max.apply( Math, columnHeights );
-            var shortCol = 0;
-
-            // Find index of short column, the first from the left
-            for (var k = 0; k < columnHeights.length; k++) {
-                if ( columnHeights[k] === minimumY ) {
-                    shortCol = k;
-                    break;
-                }
-            }
-            // position the content
-            var x = columnWidth * shortCol;
-            var y = minimumY;
-
-            var css = { position: 'absolute' };
-            if (opts.translate) {
-                css.left = 0+'px';
-                css.top = 0+'px';
-                css['-webkit-transform'] = 'translate('+x+'px, '+y+'px)'
-            } else {
-                css.left = x+'px';
-                css.top = y+'px';
-            }
-            if (opts.hardwareAccelerate) {
-                css['-webkit-transform'] = css['-webkit-transform'] + ' rotateY(0deg)';
-            }
-
-            $contentContainerEl.css(css);
-
-            // apply height to column
-            columnHeights[shortCol] = minimumY + contentView.$el.outerHeight(true);
-
-            if (columnHeights[shortCol] > maximumY) {
-                maximumY = columnHeights[shortCol];
-            }
-
-            $contentContainerEl.removeClass(this.insertingClassName);
-
-            $(this.$listEl).css('height', maximumY + 'px');
-        }.bind(this));
+        this._columnAppendIndex = 0;
+        this._columnPrependIndex = 0;
+        for (var i=this.views.length-1; i >= 0; i--) {
+            var contentView = this.views[i];
+            this.add(contentView.content);
+        }
     };
 
     MediaWallView.prototype.showMore = function (numToShow) {
@@ -320,6 +248,11 @@ define([
             return result;
         };
     }
+
+    MediaWallView.prototype.destroy = function () {
+        ContentListView.prototype.destroy.call(this);
+        this._columnViews = null;
+    };
 
     return MediaWallView;
 });
