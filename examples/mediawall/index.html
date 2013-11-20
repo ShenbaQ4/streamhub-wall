@@ -35,14 +35,15 @@
             var view = window.view = new MediaWallView({
                 el: document.getElementById("view"),
                 minContentWidth: 300,
+                initial: 5
+                ,showMore: 5
                 //,columns: 6
                 //,modal: false
-                initial: 5,
-                showMore: 5
             });
 
             var collection = new Collection(opts);
-            collection.createArchive().pipe(view.more);
+            window.archive = collection.createArchive();
+            archive.pipe(view.more);
 
             var count = 25
             setInterval(function () {

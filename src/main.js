@@ -116,6 +116,8 @@ define([
             this.$listEl.append(contentListView.$el);
         }
 
+        this._moreAmount = this._moreAmount || numColumns * 2; // Show more displays 2 new rows
+
         this.relayout();
     };
 
