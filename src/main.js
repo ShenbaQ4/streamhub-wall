@@ -40,7 +40,7 @@ define([
         ContentListView.call(this, opts);
  
         $(window).resize(function() {
-            if (self._autoFitColumns && self._containerInnerWidth != self.$el.innerWidth()) {
+            if (self._autoFitColumns) {
                 self.fitColumns();
             }
         });
@@ -122,6 +122,9 @@ define([
     };
 
     MediaWallView.prototype.fitColumns = function (opts) {
+        if (this._containerInnerWidth == this.$el.innerWidth()) {
+            return;
+        }
         opts = opts || {};
 
         if (opts.force) {
@@ -172,10 +175,14 @@ define([
      * @param content {Content|ContentView} The ContentView or Content to be removed
      * @returns {boolean} true if Content was removed, else false
      */
-    MediaWallView.prototype.remove = function (view) {
-        var retVal = ContentListView.prototype.remove.call(this, view);
-        if (retVal) {
-            this.relayout();
+    MediaWallView.prototype.remove = function (content) {
+        var retVal;
+        for (var i=0; i < this._columnViews.length; i++) {
+            var contentView = this._columnViews[i].getContentView(content);
+            if (contentView) {
+                retVal = this._columnViews[i].remove(contentView);
+                return retVal;
+            }
         }
         return retVal;
     };
@@ -242,6 +249,16 @@ define([
             return result;
         };
     }
+
+    MediaWallView.prototype.getContentView = function (newContent) {
+        for (var i=0; i < this._columnViews.length; i++) {
+            var contentView = this._columnViews[i].getContentView(newContent);
+            if (contentView) {
+                return contentView;
+            }
+        }
+        return null;
+    };
 
     MediaWallView.prototype.destroy = function () {
         ContentListView.prototype.destroy.call(this);

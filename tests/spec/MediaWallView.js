@@ -38,7 +38,7 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 stream = new MockStream();
                 view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
             });
-            it ("should contain 50 mock items & childViews after stream start", function () {
+            it ("sum of column views should contain 10 mock items & childViews after stream start", function () {
                 var onEnd = jasmine.createSpy('onEnd');
                 stream.pipe(view);
                 stream.on('end', onEnd);
@@ -46,7 +46,11 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                     return onEnd.callCount;
                 });
                 runs(function () {
-                    expect(view.views.length).toBe(9);
+                    var count = 1;
+                    for (var i=0; i < view._columnViews.length; i++) {
+                        count += view._columnViews[i].views.length;
+                    }
+                    expect(count).toBe(10);
                 });
             });
         });
@@ -59,7 +63,9 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 date3 = new Date(startDateInt + 2 * 10000),
                 content1, content2, content3;
             beforeEach(function () {
-                view = new MediaWallView();
+	            setFixtures('<div id="hub-MediaWallView"></div>');
+	            view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
+                view.render();
                 content1 = new Content({ body: 'what1' });
                 content1.createdAt = date1;
                 content2 = new Content({ body: 'what2' });
@@ -70,30 +76,19 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 view.add(content1);
                 view.add(content2);
             });
-            it("should order .views by .comparator", function () {
-                var sortedContentViews = view.views.slice(0);
-                sortedContentViews.sort(view.comparator);
-                expect(view.views).toEqual(sortedContentViews);
+            it("should select target column ContentView to write into", function () {
+                expect(view._columnViews[0].views[0].content).toEqual(content3);
+                expect(view._columnViews[1].views[0].content).toEqual(content1);
+                expect(view._columnViews[2].views[0].content).toEqual(content2);
             });
-        });
-
-        it('calls .relayout when a ContentView is removed', function () {
-            var wallView = new MediaWallView();
-            spyOn(wallView, 'relayout').andCallThrough();
-            var content = new Content('woah');
-            wallView.add(content);
-            wallView.getContentView(content).remove();
-            expect(wallView.relayout).toHaveBeenCalled();
         });
     });
 
     describe("auto fitting columns", function () {
-        var view,
-            stream;
+        var view;
 
 	    beforeEach(function() {
 	        setFixtures('<div id="hub-MediaWallView"></div>');
-	        stream = new MockStream();
 		});
 
         it('calls #fitColumns() in constructor if no opts.columns specified', function () {
@@ -102,7 +97,6 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
             $('#hub-MediaWallView').width(220*4); //220px is the default width of content
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
             view.render();
-            stream.pipe(view);
             expect(view._autoFitColumns).toBe(true);
             expect(MediaWallView.prototype.fitColumns).toHaveBeenCalled();
         });
@@ -111,7 +105,6 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
             $('#hub-MediaWallView').width(220*4); //220px is the default width of content
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
             view.render();
-            stream.pipe(view);
             spyOn(view, 'fitColumns');
             $(window).trigger('resize');
             expect(view._autoFitColumns).toBe(true);
@@ -122,8 +115,7 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
             $('#hub-MediaWallView').width(12345);
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0), minContentWidth: 400 });
             view.render();
-            stream.pipe(view);
-            expect(view._columns).toBe(parseInt(12345/400));
+            expect(view._columnViews.length).toBe(parseInt(12345/400));
         });
     });
 });
