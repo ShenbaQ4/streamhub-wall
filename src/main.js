@@ -25,8 +25,7 @@ define([
         this._autoFitColumns = true;
         this._contentWidth = opts.minContentWidth || 300;
         this._columnViews = [];
-        this._columnAppendIndex = 0;
-        this._columnPrependIndex = 0;
+        this._columnInsertIndex = 0;
         this._containerInnerWidth = 0;
         this._maxVisibleItems = opts.maxVisibleItems || 20;
 
@@ -108,7 +107,10 @@ define([
         this._setColumnWidth((100/numColumns) + '%');
 
         for (var i=0; i < numColumns; i++) {
-            var contentListView = new ContentListView({ maxVisibleItems: this._maxVisibleItems/numColumns });
+            var contentListView = new ContentListView({
+                maxVisibleItems: this._maxVisibleItems/numColumns,
+                stash: this.more
+            });
             this._columnViews.push(contentListView);
             contentListView.$el.addClass(this.columnClassName);
             this.$listEl.append(contentListView.$el);
@@ -157,17 +159,9 @@ define([
         opts = opts || {};
         var self = this;
 
-        var targetColumnView;
-        if (opts.append === true && newContentViewIndex > 0) {
-            var targetColumnView = this._columnViews[this._columnAppendIndex];
-            this._columnAppendIndex++;
-            this._columnAppendIndex = this._columnAppendIndex == this._columnViews.length ? 0 : this._columnAppendIndex;
-        } else {
-            // New content goes to the next available column for insertion
-            var targetColumnView = this._columnViews[this._columnPrependIndex];
-            this._columnPrependIndex++;
-            this._columnPrependIndex = this._columnPrependIndex == this._columnViews.length ? 0 : this._columnPrependIndex;
-        }
+        var targetColumnView = this._columnViews[this._columnInsertIndex];
+        this._columnInsertIndex++;
+        this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
         targetColumnView.write(content);
     };
     
@@ -203,8 +197,7 @@ define([
         // available view
         opts = opts || {};
 
-        this._columnAppendIndex = 0;
-        this._columnPrependIndex = 0;
+        this._columnInsertIndex = 0;
         for (var i=this.views.length-1; i >= 0; i--) {
             var contentView = this.views[i];
             this.add(contentView.content);
