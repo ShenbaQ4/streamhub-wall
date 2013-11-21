@@ -64,6 +64,7 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 content1, content2, content3;
             beforeEach(function () {
 	            setFixtures('<div id="hub-MediaWallView"></div>');
+                $('#hub-MediaWallView').width(300*4); //220px is the default width of content
 	            view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
                 view.render();
                 content1 = new Content({ body: 'what1' });
@@ -77,6 +78,7 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 view.add(content2);
             });
             it("should select target column ContentView to write into", function () {
+                expect(view._columnViews.length).toEqual(4);
                 expect(view._columnViews[0].views[0].content).toEqual(content3);
                 expect(view._columnViews[1].views[0].content).toEqual(content1);
                 expect(view._columnViews[2].views[0].content).toEqual(content2);
