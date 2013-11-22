@@ -1,15 +1,48 @@
 <!DOCTYPE html>
 <html>
-<head>
-    <link rel="stylesheet" type="text/css" href="../../lib/streamhub-sdk/src/css/style.css">
-    <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
-    <meta name="viewport" content="initial-scale=1.0, user-scalable=no, maximum-scale=1.0">
-    <style> body { margin: 0; padding: 0; background-color: #EFEFEF; }</style>
-</head>
+    <head>
+        <link rel="stylesheet" type="text/css" href="../lib/streamhub-sdk/src/css/style.css">
+        <style>
+        body {
+            font-family: sans-serif;
+            font-size: 14px;
+            line-height: 18px;
+        }
+        #view {
+            position:relative;
+        }
+        a {
+            text-decoration: none;
+        }
+        .content, .content[data-content-has-avatar=true] {
+            background-color:white;
+            margin: 10px;
+            width: 300px;
+            overflow-x: hidden;
+        }
+        #view .content {
+          -webkit-transition-duration: 1s;
+             -moz-transition-duration: 1s;
+              -ms-transition-duration: 1s;
+               -o-transition-duration: 1s;
+                  transition-duration: 1s;
+
+          -webkit-transition-property: -webkit-transform, opacity, top, left;
+             -moz-transition-property:    -moz-transform, opacity, top, left;
+              -ms-transition-property:     -ms-transform, opacity, top, left;
+               -o-transition-property:      -o-transform, opacity, top, left;
+                  transition-property:         transform, opacity, top, left;
+        }
+        
+        </style>
+        <script type="text/javascript" src="//platform.twitter.com/widgets.js"></script>
+        <script type="text/javascript" src="/lib/requirejs/require.js"></script>
+        <script src="/streamhub-sdk.min.js"></script>
+        <script src="/streamhub-wall.min.js"></script>
+    </head>
     <body>
         <?php
         // include the library include(dirname(__FILE__) . “/livefyre-api/libs/php/Livefyre.php”); // set up some values
-            include(dirname(__FILE__) . "/JWT.php");
 
             $cms_content_id = "xbox-0";
             $cms_permalink_url = "http://www.url.com/xbox-0";
