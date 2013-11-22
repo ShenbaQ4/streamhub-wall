@@ -5,6 +5,7 @@ define([
     'text!streamhub-wall/style.css',
     'inherits'
 ], function($, ContentListView, ContentView, MEDIA_WALL_CSS, inherits) {
+    'use strict';
 
     var MEDIA_WALL_STYLE_EL;
 
