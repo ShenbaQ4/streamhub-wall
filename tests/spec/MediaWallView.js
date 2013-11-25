@@ -62,7 +62,6 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
 	            setFixtures('<div id="hub-MediaWallView"></div>');
                 $('#hub-MediaWallView').width(300*4); //220px is the default width of content
 	            view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
-                view.render();
                 content1 = new Content({ body: 'what1' });
                 content1.createdAt = date1;
                 content2 = new Content({ body: 'what2' });
@@ -80,6 +79,35 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 expect(view._columnViews[2].views[0].content).toEqual(content2);
             });
         });
+
+        describe("when removing content", function () {
+            var view, content1, content2, content3;
+            beforeEach(function () {
+	            setFixtures('<div id="hub-MediaWallView"></div>');
+                $('#hub-MediaWallView').width(300*4); //220px is the default width of content
+	            view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
+                content1 = new Content({ body: 'what1' });
+                content2 = new Content({ body: 'what2' });
+                content3 = new Content({ body: 'what3' });
+                debugger;
+                view.add(content3); //column1
+                view.add(content1); //column2
+                view.add(content2); //column3
+            });
+
+            it('should remove the contentView from #views', function () {
+                expect(view.views.length).toEqual(3);
+                view.remove(content1)
+                expect(view.views.length).toEqual(2);
+            });
+
+            it('should remove the contentView from the appropriate column view', function () {
+                expect(view._columnViews[0].views.length).toEqual(1);
+                expect(view._columnViews[0].views[0].content.body).toEqual('what3');
+                view.remove(content3);
+                expect(view._columnViews[0].views.length).toEqual(0);
+            });
+        });
     });
 
     describe("auto fitting columns", function () {
@@ -94,7 +122,6 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
 
             $('#hub-MediaWallView').width(220*4); //220px is the default width of content
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
-            view.render();
             expect(view._autoFitColumns).toBe(true);
             expect(MediaWallView.prototype.fitColumns).toHaveBeenCalled();
         });
@@ -102,7 +129,6 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
         it('calls #fitColumns() when window is resized', function () {
             $('#hub-MediaWallView').width(220*4); //220px is the default width of content
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
-            view.render();
             spyOn(view, 'fitColumns');
             $(window).trigger('resize');
             expect(view._autoFitColumns).toBe(true);
@@ -112,7 +138,6 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
         it('sets column width proportional to the media wall width', function () {
             $('#hub-MediaWallView').width(12345);
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0), minContentWidth: 400 });
-            view.render();
             expect(view._columnViews.length).toBe(parseInt(12345/400));
         });
     });

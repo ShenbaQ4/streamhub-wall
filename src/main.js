@@ -220,23 +220,6 @@ define([
     MediaWallView.prototype._insert = function (contentView) {
         return; // no-op: contentView inserts are deferred to individual Column views
     };
-    
-    /**
-     * Remove a View from this MediaWallView
-     * @param content {Content|ContentView} The ContentView or Content to be removed
-     * @returns {boolean} true if Content was removed, else false
-     */
-    MediaWallView.prototype.remove = function (content) {
-        var retVal;
-        for (var i=0; i < this._columnViews.length; i++) {
-            var contentView = this._columnViews[i].getContentView(content);
-            if (contentView) {
-                retVal = this._columnViews[i].remove(contentView);
-                return retVal;
-            }
-        }
-        return retVal;
-    };
 
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
