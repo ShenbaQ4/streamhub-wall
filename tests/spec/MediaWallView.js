@@ -89,7 +89,6 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 content1 = new Content({ body: 'what1' });
                 content2 = new Content({ body: 'what2' });
                 content3 = new Content({ body: 'what3' });
-                debugger;
                 view.add(content3); //column1
                 view.add(content1); //column2
                 view.add(content2); //column3
