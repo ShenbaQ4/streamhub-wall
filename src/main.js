@@ -209,8 +209,6 @@ define([
      * @return the newly created ContentView
      */
     MediaWallView.prototype.add = function(content) {
-        var self = this;
-
         var contentView = ContentListView.prototype.add.call(this, content);
 
         var targetColumnView = this._columnViews[this._columnInsertIndex];
