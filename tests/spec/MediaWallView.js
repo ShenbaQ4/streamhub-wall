@@ -38,7 +38,7 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                 stream = new MockStream();
                 view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
             });
-            it ("sum of column views should contain 10 mock items & childViews after stream start", function () {
+            it ("should contain 9 mock items & childViews (from MockAttatchmentsStream) after stream start", function () {
                 var onEnd = jasmine.createSpy('onEnd');
                 stream.pipe(view);
                 stream.on('end', onEnd);
@@ -46,11 +46,7 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
                     return onEnd.callCount;
                 });
                 runs(function () {
-                    var count = 1;
-                    for (var i=0; i < view._columnViews.length; i++) {
-                        count += view._columnViews[i].views.length;
-                    }
-                    expect(count).toBe(10);
+                    expect(view.views.length).toBe(9);
                 });
             });
         });
