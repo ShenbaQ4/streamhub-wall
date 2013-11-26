@@ -1,11 +1,11 @@
 {
   "name": "streamhub-wall",
-  "version": "2.1.0",
+  "version": "2.2.0",
   "main": [
     "./src/main.js"
   ],
   "dependencies": {
-    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.3.0",
+    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.4.0",
     "requirejs": "~2.1.5"
   },
   "devDependencies": {

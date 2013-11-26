@@ -5,6 +5,7 @@ define([
     'text!streamhub-wall/style.css',
     'inherits'
 ], function($, ContentListView, ContentView, MEDIA_WALL_CSS, inherits) {
+    'use strict';
 
     var MEDIA_WALL_STYLE_EL;
 
@@ -24,8 +25,9 @@ define([
         this._id = new Date().getTime();
         this._autoFitColumns = true;
         this._contentWidth = opts.minContentWidth || 300;
-
-        ContentListView.call(this, opts);
+        this._columnViews = [];
+        this._columnInsertIndex = 0;
+        this._containerInnerWidth = 0;
 
         this.debouncedRelayout = debounce(function () {
             self._relayout.apply(self, arguments);
@@ -34,9 +36,10 @@ define([
         this.debouncedFitColumns = debounce(function () {
             self._fitColumns();
         }, opts.debounceRelayout || 200);
+
+        ContentListView.call(this, opts);
  
         $(window).resize(function() {
-            self.relayout();
             if (self._autoFitColumns) {
                 self.fitColumns();
             }
@@ -47,7 +50,6 @@ define([
             MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('head');
         }
         if (opts.columns && typeof opts.columns === 'number') {
-            this._columns = opts.columns;
             this._autoFitColumns = false;
             this.setColumns(opts.columns);
         }
@@ -59,15 +61,12 @@ define([
 
 
     MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
-    MediaWallView.prototype.contentContainerClassName = 'content-container';
+    MediaWallView.prototype.columnClassName = 'hub-wall-column';
 
-    MediaWallView.prototype.setElement = function (el) {
-        ContentListView.prototype.setElement.call(this, el);
-        this.$el
-            .addClass(this.mediaWallClassName)
-            .addClass('streamhub-media-wall-' + this._id);
-    };
-
+    /**
+     * Gets the style element associated with this instance of MediaWallView
+     * @returns {HTMLElement} The style element for this MediaWallView
+     */
     MediaWallView.prototype._getWallStyleEl = function () {
         var $wallStyleEl = $('#wall-style-' + this._id);
         if ($wallStyleEl) {
@@ -75,79 +74,51 @@ define([
         }
     };
 
-    MediaWallView.prototype.setColumns = function (numColumns) {
-        this._columns = numColumns;
+    /**
+     * Sets the column width in the style element for this MediaWallView
+     * instance.
+     * @returns {Number} The width of the column in pixels
+     */
+    MediaWallView.prototype._setColumnWidth = function (width) {
         var $wallStyleEl = this._getWallStyleEl();
         if ($wallStyleEl) {
             $wallStyleEl.remove();
         }
         $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
-        this._setContentContainerWidth((100/numColumns) + '%');
-        this.relayout();
-    };
-
-    MediaWallView.prototype._setContentContainerWidth = function (width) {
-        var $wallStyleEl = this._getWallStyleEl();
-        if ($wallStyleEl) {
-            $wallStyleEl.remove();
-        }
-        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
-        $wallStyleEl.html('.streamhub-media-wall-'+this._id+' .content-container { width: ' + width + '; }');
+        $wallStyleEl.html('.streamhub-media-wall-'+this._id+' .hub-wall-column { width: ' + width + '; }');
         $wallStyleEl.appendTo('head');
+
+        return this._getColumnWidth();
     };
 
     /**
-     * Add a piece of Content to the MediaWallView
-     * @param content {Content} A Content model to add to the MediaWallView
-     * @return the newly created ContentView
+     * Gets the column width
+     * @returns {Number} The width of the column in pixels
      */
-    MediaWallView.prototype.add = function(content) {
-        var self = this,
-            contentView = ContentListView.prototype.add.call(this, content);
-
-        contentView.$el.on('imageLoaded.hub', function() {
-            self.relayout();
-        });
-
-        this.relayout();
+    MediaWallView.prototype._getColumnWidth = function () {
+        var $contentContainerEl = this.$el.find('.'+this.columnClassName);
+        if ($contentContainerEl.length) {
+            this._columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
+            return this._columnWidth;
+        }
+        return 0;
     };
-    
+
     /**
-     * Remove a View from this ListView
-     * @param content {Content|ContentView} The ContentView or Content to be removed
-     * @returns {boolean} true if Content was removed, else false
+     * Set the element that this ContentListView renders in
+     * @param element {HTMLElement} The element to render the ContentListView in
      */
-    MediaWallView.prototype.remove = function (view) {
-        var retVal = ContentListView.prototype.remove.call(this, view);
-        if (retVal) {
-            this.relayout();
-        }
-        return retVal;
-    };
-
-    MediaWallView.prototype._insert = function (contentView) {
-        var newContentViewIndex,
-            $previousEl;
-
-        newContentViewIndex = this.views.indexOf(contentView);
-
-        var $containerEl = $('<div class="' + this.contentContainerClassName + '"></div>');
-        contentView.$el.wrap($containerEl);
-        var $wrappedEl = contentView.$el.parent();
-
-        $wrappedEl.addClass(this.insertingClassName);
-
-        if (newContentViewIndex === 0) {
-            // Beginning!
-            $wrappedEl.prependTo(this.el);
-        } else {
-            // Find it's previous contentView and insert new contentView after
-            $previousEl = this.views[newContentViewIndex - 1].$el;
-            $wrappedEl.insertAfter($previousEl.parent('.'+this.contentContainerClassName));
-        }
+    MediaWallView.prototype.setElement = function (el) {
+        ContentListView.prototype.setElement.call(this, el);
+        this.$el
+            .addClass(this.mediaWallClassName)
+            .addClass('streamhub-media-wall-' + this._id);
     };
 
     MediaWallView.prototype.fitColumns = function (opts) {
+        if (this._containerInnerWidth == this.$el.innerWidth()) {
+            return;
+        }
         opts = opts || {};
 
         if (opts.force) {
@@ -157,17 +128,101 @@ define([
         }
     };
 
+    /**
+     * Determines the number columns based on the configured #_contentWidth.
+     * Initiates relayout logic for the determined number of columns.
+     * @param opts {Object}
+     */
     MediaWallView.prototype._fitColumns = function (opts) {
-        var containerWidth = $(this.el).innerWidth();
-        var numColumns = parseInt(containerWidth / this._contentWidth, 10) || 1;
+        this._containerInnerWidth = $(this.el).innerWidth();
+        var numColumns = parseInt(this._containerInnerWidth / this._contentWidth, 10) || 1;
+        this._clearColumns();
         this.setColumns(numColumns);
     };
 
-    MediaWallView.prototype.insertingClassName = 'hub-wall-is-inserting';
+    /**
+     * Creates a column view for the number of columns specified. Triggers
+     * relayout.
+     * @param numColumns {Number} The number of columns the MediaWallView should be composed of
+     */
+    MediaWallView.prototype.setColumns = function (numColumns) {
+        this._numberOfColumns = numColumns;
+        var $wallStyleEl = this._getWallStyleEl();
+        if ($wallStyleEl) {
+            $wallStyleEl.remove();
+        }
+        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
+        this._setColumnWidth((100/this._numberOfColumns) + '%');
+
+        for (var i=0; i < this._numberOfColumns; i++) {
+            this._createColumnView();
+        }
+
+        this._moreAmount = this._moreAmount || numColumns * 2; // Show more displays 2 new rows
+
+        this.relayout();
+    };
+
+    /**
+     * Gets the number of maximum visible items for a given column view
+     * @returns {Number} The number of maximum visible items for a given column view
+     */
+    MediaWallView.prototype._getMaxVisibleItemsForColumn = function () {
+        return this._maxVisibleItems/this._numberOfColumns;
+    };
+
+    /**
+     * Creates a column view and appends it into the DOM
+     * @returns {View} The view representing a column in the MediaWall. Often a type of ListView.
+     */
+    MediaWallView.prototype._createColumnView = function () {
+        var columnView = new ContentListView({
+            maxVisibleItems: this._getMaxVisibleItemsForColumn(),
+            stash: this.more
+        });
+        this._columnViews.push(columnView);
+        columnView.$el.addClass(this.columnClassName);
+        this.$listEl.append(columnView.$el);
+        return columnView;
+    };
+
+    /**
+     * Removes column views from the MediaWallView
+     */
+    MediaWallView.prototype._clearColumns = function () {
+        var contentViews = [];
+        for (var i=0; i < this._columnViews.length; i++) {
+            var columnView = this._columnViews[i];
+            contentViews = contentViews.concat(columnView.views);
+            columnView.destroy();
+        }
+        this.views = contentViews;
+        if (this.comparator) {
+            this.views.sort(this.comparator);
+        }
+        this._columnViews = [];
+    };
+
+    /**
+     * Add a piece of Content to the MediaWallView
+     * @param content {Content} A Content model to add to the MediaWallView
+     * @return the newly created ContentView
+     */
+    MediaWallView.prototype.add = function(content) {
+        var contentView = ContentListView.prototype.add.call(this, content);
+
+        var targetColumnView = this._columnViews[this._columnInsertIndex];
+        this._columnInsertIndex++;
+        this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
+        targetColumnView.add(contentView);
+    };
+
+    MediaWallView.prototype._insert = function (contentView) {
+        return; // no-op: contentView inserts are deferred to individual Column views
+    };
 
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
-
         if (opts.force) {
             this._relayout.apply(this, arguments);
         } else {
@@ -175,60 +230,41 @@ define([
         }
     };
 
+    /**
+     * Re-renders all content views for the MediaWallView.
+     */
     MediaWallView.prototype._relayout = function(opts) {
-        opts = opts || {};
-        var columnWidth = 0;
-        var columnHeights = [];
-        var cols = 0;
-        var containerWidth = $(this.el).innerWidth();
-        var maximumY;
+        this.columnBasedLayout();
+    };
 
-        var self = this;
-        $.each(this.views, function (index, contentView) {
-            var $contentContainerEl = contentView.$el.parent('.'+self.contentContainerClassName);
+    /**
+     * The column-based round-robin strategy of laying out content views
+     */
+    MediaWallView.prototype.columnBasedLayout = function () {
+        // Round-robin through columns, prepending each column with the next
+        // available view
+        this._columnInsertIndex = 0;
+        for (var i=this.views.length-1; i >= 0; i--) {
+            var contentView = this.views[i];
+            this.add(contentView.content);
+        }
+    };
 
-            if (columnWidth === 0) {
-                columnWidth = $contentContainerEl[0].getBoundingClientRect().width;
-                if (columnWidth !== 0) {
-                    cols = Math.floor(containerWidth / columnWidth);
-                    for (var j = 0; j < cols; j++) {
-                        columnHeights[j] = 0;
-                    }
-                }
-            }
-            // get the minimum Y value from the columns
-            var minimumY = Math.min.apply( Math, columnHeights );
-            maximumY = Math.max.apply( Math, columnHeights );
-            var shortCol = 0;
-
-            // Find index of short column, the first from the left
-            for (var k = 0; k < columnHeights.length; k++) {
-                if ( columnHeights[k] === minimumY ) {
-                    shortCol = k;
-                    break;
-                }
-            }
-            // position the content
-            var x = columnWidth * shortCol;
-            var y = minimumY;
-
-            $contentContainerEl.css({
-                position: 'absolute',
-                left: x+'px',
-                top: y+'px'
-            });
-
-            // apply height to column
-            columnHeights[shortCol] = minimumY + contentView.$el.outerHeight(true);
-
-            if (columnHeights[shortCol] > maximumY) {
-                maximumY = columnHeights[shortCol];
-            }
-
-            $contentContainerEl.removeClass(self.insertingClassName);
-        });
-
-        $(this.$listEl).css('height', maximumY + 'px');
+    /**
+     * Show More content.
+     * ContentListView keeps track of an internal ._newContentGoal
+     *     which is how many more items he wishes he had.
+     *     This increases that goal and marks the Writable
+     *     side of ContentListView as ready for more writes.
+     * @param numToShow {number} The number of items to try to add
+     */
+    MediaWallView.prototype.showMore = function (numToShow) {
+        // When fetching more content from the archive, remove the bounded
+        // visible limit
+        for (var i=0; i < this._columnViews.length; i++) {
+            this._columnViews[i].bounded(false);
+        }
+        ContentListView.prototype.showMore.call(this, numToShow);
     };
 
     /**
@@ -260,6 +296,11 @@ define([
             return result;
         };
     }
+
+    MediaWallView.prototype.destroy = function () {
+        ContentListView.prototype.destroy.call(this);
+        this._columnViews = null;
+    };
 
     return MediaWallView;
 });
