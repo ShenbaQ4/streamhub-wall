@@ -1,6 +1,5 @@
 .streamhub-media-wall-view {
     position:relative;
-    overflow: scroll;
 }
 .streamhub-media-wall-view .hub-wall-column {
     display: inline-block;
