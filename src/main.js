@@ -199,7 +199,7 @@ define([
         for (var i=0; i < this._columnViews.length; i++) {
             var columnView = this._columnViews[i];
             contentViews = contentViews.concat(columnView.views);
-            columnView.destroy();
+            columnView.detach();
         }
         this.views = contentViews;
         if (this.comparator) {
