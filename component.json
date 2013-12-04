@@ -5,7 +5,7 @@
     "./src/main.js"
   ],
   "dependencies": {
-    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.4.0",
+    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.4.2",
     "requirejs": "~2.1.5"
   },
   "devDependencies": {

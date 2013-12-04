@@ -2,7 +2,7 @@
   "name": "streamhub-wall",
   "description": "Livefyre LiveMediaWall",
   "author": "Livefyre <support@livefyre.com>",
-  "version": "2.2.1",
+  "version": "2.2.2",
   "devDependencies": {
     "bower": "~1.0.0",
     "http-server": "*",

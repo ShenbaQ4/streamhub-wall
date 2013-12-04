@@ -39,7 +39,7 @@ define([
 
         ContentListView.call(this, opts);
  
-        $(window).resize(function() {
+        $(window).resize(function(e) {
             if (self._autoFitColumns) {
                 self.fitColumns();
             }
@@ -47,7 +47,7 @@ define([
 
         opts.css = (typeof opts.css === 'undefined') ? true : opts.css;
         if (!MEDIA_WALL_STYLE_EL && opts.css) {
-            MEDIA_WALL_STYLE_EL = $('<style></style>').text(MEDIA_WALL_CSS).prependTo('head');
+            MEDIA_WALL_STYLE_EL = $('<style>'+MEDIA_WALL_CSS+'</style>').prependTo('head');
         }
         if (opts.columns && typeof opts.columns === 'number') {
             this._autoFitColumns = false;
@@ -84,10 +84,9 @@ define([
         if ($wallStyleEl) {
             $wallStyleEl.remove();
         }
-        $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
-        $wallStyleEl.html('.streamhub-media-wall-'+this._id+' .hub-wall-column { width: ' + width + '; }');
+        var wallCss = '.streamhub-media-wall-'+this._id+' .hub-wall-column { width: ' + width + '; }';
+        $wallStyleEl = $('<style id="wall-style-' + this._id + '">'+wallCss+'</style>');
         $wallStyleEl.appendTo('head');
-
         return this._getColumnWidth();
     };
 
@@ -116,7 +115,7 @@ define([
     };
 
     MediaWallView.prototype.fitColumns = function (opts) {
-        if (this._containerInnerWidth == this.$el.innerWidth()) {
+        if (this._containerInnerWidth === this.$el.innerWidth()) {
             return;
         }
         opts = opts || {};
@@ -134,7 +133,13 @@ define([
      * @param opts {Object}
      */
     MediaWallView.prototype._fitColumns = function (opts) {
-        this._containerInnerWidth = $(this.el).innerWidth();
+        var latestWidth = this.$el.innerWidth();
+        // If width hasn't changed, do nothing
+        if (latestWidth === this._containerInnerWidth) {
+            return;
+        }
+
+        this._containerInnerWidth = latestWidth;
         var numColumns = parseInt(this._containerInnerWidth / this._contentWidth, 10) || 1;
         this._clearColumns();
         this.setColumns(numColumns);
@@ -215,6 +220,11 @@ define([
         this._columnInsertIndex++;
         this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
         targetColumnView.add(contentView);
+        // IE8 will not automatically push the 'show more' button down as the
+        // wall grows. Adding and removing a random class will force a repaint
+        var randomClass = String(Math.floor(Math.random()));
+        this.$el.addClass(randomClass);
+        this.$el.removeClass(randomClass);
     };
 
     MediaWallView.prototype._insert = function (contentView) {
