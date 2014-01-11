@@ -211,10 +211,11 @@ define([
     /**
      * Add a piece of Content to the MediaWallView
      * @param content {Content} A Content model to add to the MediaWallView
+     * @param [index] {number} Where to add the content
      * @return the newly created ContentView
      */
-    MediaWallView.prototype.add = function(content) {
-        var contentView = ContentListView.prototype.add.call(this, content);
+    MediaWallView.prototype.add = function(content, index) {
+        var contentView = ContentListView.prototype.add.apply(this, arguments);
 
         var targetColumnView = this._columnViews[this._columnInsertIndex];
         this._columnInsertIndex++;
