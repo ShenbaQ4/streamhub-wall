@@ -36,6 +36,10 @@ require.config({
   },{
     name: "stream",
     location: "lib/stream/src"
+  },{
+    name: "view",
+    location: "lib/view/src",
+    main: "view"
   }],
   shim: {
     jquery: {
