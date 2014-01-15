@@ -195,15 +195,9 @@ define([
      * Removes column views from the MediaWallView
      */
     MediaWallView.prototype._clearColumns = function () {
-        var contentViews = [];
         for (var i=0; i < this._columnViews.length; i++) {
             var columnView = this._columnViews[i];
-            contentViews = contentViews.concat(columnView.views);
             columnView.detach();
-        }
-        this.views = contentViews;
-        if (this.comparator) {
-            this.views.sort(this.comparator);
         }
         this._columnViews = [];
     };
@@ -220,7 +214,11 @@ define([
         var targetColumnView = this._columnViews[this._columnInsertIndex];
         this._columnInsertIndex++;
         this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
-        targetColumnView.add(contentView);
+        
+        if (typeof(index) === 'number') {
+            index = Math.min(Math.floor(index/this._columnViews.length), targetColumnView.views.length);
+        }
+        targetColumnView.add(contentView, index);
         // IE8 will not automatically push the 'show more' button down as the
         // wall grows. Adding and removing a random class will force a repaint
         var randomClass = String(Math.floor(Math.random()));
@@ -257,7 +255,8 @@ define([
         this._columnInsertIndex = 0;
         for (var i=this.views.length-1; i >= 0; i--) {
             var contentView = this.views[i];
-            this.add(contentView.content);
+            var index = this.isIndexedView(contentView) ? i : null;
+            this.add(contentView.content, index);
         }
     };
 
