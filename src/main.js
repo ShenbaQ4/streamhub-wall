@@ -198,6 +198,7 @@ define([
         for (var i=0; i < this._columnViews.length; i++) {
             var columnView = this._columnViews[i];
             columnView.detach();
+            columnView.destroy();
         }
         this._columnViews = [];
     };
@@ -255,7 +256,7 @@ define([
         this._columnInsertIndex = 0;
         for (var i=this.views.length-1; i >= 0; i--) {
             var contentView = this.views[i];
-            var index = this.isIndexedView(contentView) ? i : null;
+            var index = this._isIndexedView(contentView) ? i : undefined;
             this.add(contentView.content, index);
         }
     };
