@@ -29,10 +29,6 @@ define([
         this._columnInsertIndex = 0;
         this._containerInnerWidth = 0;
         
-//        this.debouncedRelayout = debounce(function () {
-//            self._relayout.apply(self, arguments);
-//        }, opts.debounceRelayout || 200);
-        
         this.debouncedFitColumns = debounce(function () {
             self._fitColumns();
         }, opts.debounceRelayout || 200);
@@ -204,30 +200,23 @@ define([
     };
 
     /**
-     * Add a piece of Content to the MediaWallView
-     * @param content {Content} A Content model to add to the MediaWallView
-     * @param [forcedIndex] {number} Where to add the content
-     * @return the newly created ContentView
+     * Insert a contentView into the Media Wall's column ContentListViews
+     * @protected
+     * @param view {View} The view to add to this.el
+     * @param [forcedIndex] {number} Index of the view in this.views
      */
-    MediaWallView.prototype.add = function(content, forcedIndex) {
-        console.log('adding', forcedIndex, this.views);
-        var contentView = ContentListView.prototype.add.apply(this, arguments);
-    };
-
     MediaWallView.prototype._insert = function (contentView, forcedIndex) {
         var targetColumnView = this._columnViews[this._columnInsertIndex];
         this._columnInsertIndex++;
         this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
         
         if (typeof(forcedIndex) === 'number') {
-            var temp = forcedIndex;
-            forcedIndex = Math.min(Math.ceil(forcedIndex/this._columnViews.length), targetColumnView.views.length);
-            console.log('_insert', temp, forcedIndex, targetColumnView.views.length, this._columnInsertIndex, this.views);
-//            console.log('poop', forcedIndex, this.views);
-//            forcedIndex = (forcedIndex !== 0) ? targetColumnView.views.length: 0;
-            if (forcedIndex !== targetColumnView.views.length) {debugger}
+            forcedIndex = Math.min(
+                    Math.ceil(forcedIndex / this._columnViews.length),
+                    targetColumnView.views.length);
         }
         targetColumnView.add(contentView, forcedIndex);
+
         // IE8 will not automatically push the 'show more' button down as the
         // wall grows. Adding and removing a random class will force a repaint
         var randomClass = String(Math.floor(Math.random()));
@@ -237,17 +226,6 @@ define([
 
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
-        if (opts.force) {
-            this._relayout.apply(this, arguments);
-        } else {
-            this.debouncedRelayout.apply(this, arguments);
-        }
-    };
-
-    /**
-     * Re-renders all content views for the MediaWallView.
-     */
-    MediaWallView.prototype._relayout = function(opts) {
         this.columnBasedLayout();
     };
 
@@ -261,7 +239,9 @@ define([
         for (var i=0; i < this.views.length; i++) {
             var contentView = this.views[i];
             var index = this._isIndexedView(contentView) ? i : undefined;
-            contentView && this._insert(contentView.content, index);
+            if (contentView) {
+                this._insert(contentView.content, index);
+            }
         }
     };
 

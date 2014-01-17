@@ -38,7 +38,7 @@
             
             var view = window.view = new MediaWall({
                 initial: 20,
-                showMore: 4,
+                showMore: 7,
                 el: document.getElementById("view")
             });
 
@@ -50,14 +50,14 @@
             var archive = window.archive = collection.createArchive();
             
             var injector = new Injector({
-                interval: 4,
+                interval: 6,
                 count: 1
             });
             
             featuredArchive.pipe(injector).target(view);
             archive.pipe(view.more);
             
-            var count = 0;
+            var count = 35;
             setInterval(function () {
                 if (count > 0) { view.write(new Content({ body: new Date() })); }
                 count--;
