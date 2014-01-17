@@ -22,7 +22,7 @@
             'streamhub-wall',
             'streamhub-sdk/collection',
             'streamhub-sdk/views/streams/injector'
-        ],function (Content, ContentListView, Collection, Injector) {
+        ],function (Content, MediaWall, Collection, Injector) {
             var opts = {
                 "network": "labs-t402.fyre.co",
                 "siteId": "303827",
@@ -36,9 +36,9 @@
                 "environment": "t402.livefyre.com"
             };
             
-            var view = window.view = new ContentListView({
+            var view = window.view = new MediaWall({
                 initial: 20,
-                showMore: 7,
+                showMore: 4,
                 el: document.getElementById("view")
             });
 
@@ -50,14 +50,14 @@
             var archive = window.archive = collection.createArchive();
             
             var injector = new Injector({
-                interval: 6,
+                interval: 4,
                 count: 1
             });
             
-            archive.pipe(view.more);
             featuredArchive.pipe(injector).target(view);
+            archive.pipe(view.more);
             
-            var count = 25;
+            var count = 0;
             setInterval(function () {
                 if (count > 0) { view.write(new Content({ body: new Date() })); }
                 count--;

@@ -28,11 +28,11 @@ define([
         this._columnViews = [];
         this._columnInsertIndex = 0;
         this._containerInnerWidth = 0;
-
-        this.debouncedRelayout = debounce(function () {
-            self._relayout.apply(self, arguments);
-        }, opts.debounceRelayout || 200);
-
+        
+//        this.debouncedRelayout = debounce(function () {
+//            self._relayout.apply(self, arguments);
+//        }, opts.debounceRelayout || 200);
+        
         this.debouncedFitColumns = debounce(function () {
             self._fitColumns();
         }, opts.debounceRelayout || 200);
@@ -206,29 +206,33 @@ define([
     /**
      * Add a piece of Content to the MediaWallView
      * @param content {Content} A Content model to add to the MediaWallView
-     * @param [index] {number} Where to add the content
+     * @param [forcedIndex] {number} Where to add the content
      * @return the newly created ContentView
      */
-    MediaWallView.prototype.add = function(content, index) {
+    MediaWallView.prototype.add = function(content, forcedIndex) {
+        console.log('adding', forcedIndex, this.views);
         var contentView = ContentListView.prototype.add.apply(this, arguments);
+    };
 
+    MediaWallView.prototype._insert = function (contentView, forcedIndex) {
         var targetColumnView = this._columnViews[this._columnInsertIndex];
         this._columnInsertIndex++;
         this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
         
-        if (typeof(index) === 'number') {
-            index = Math.min(Math.floor(index/this._columnViews.length), targetColumnView.views.length);
+        if (typeof(forcedIndex) === 'number') {
+            var temp = forcedIndex;
+            forcedIndex = Math.min(Math.ceil(forcedIndex/this._columnViews.length), targetColumnView.views.length);
+            console.log('_insert', temp, forcedIndex, targetColumnView.views.length, this._columnInsertIndex, this.views);
+//            console.log('poop', forcedIndex, this.views);
+//            forcedIndex = (forcedIndex !== 0) ? targetColumnView.views.length: 0;
+            if (forcedIndex !== targetColumnView.views.length) {debugger}
         }
-        targetColumnView.add(contentView, index);
+        targetColumnView.add(contentView, forcedIndex);
         // IE8 will not automatically push the 'show more' button down as the
         // wall grows. Adding and removing a random class will force a repaint
         var randomClass = String(Math.floor(Math.random()));
         this.$el.addClass(randomClass);
         this.$el.removeClass(randomClass);
-    };
-
-    MediaWallView.prototype._insert = function (contentView) {
-        return; // no-op: contentView inserts are deferred to individual Column views
     };
 
     MediaWallView.prototype.relayout = function (opts) {
@@ -251,13 +255,13 @@ define([
      * The column-based round-robin strategy of laying out content views
      */
     MediaWallView.prototype.columnBasedLayout = function () {
-        // Round-robin through columns, prepending each column with the next
+        // Round-robin through columns, inserting each column with the next
         // available view
         this._columnInsertIndex = 0;
-        for (var i=this.views.length-1; i >= 0; i--) {
+        for (var i=0; i < this.views.length; i++) {
             var contentView = this.views[i];
             var index = this._isIndexedView(contentView) ? i : undefined;
-            this.add(contentView.content, index);
+            contentView && this._insert(contentView.content, index);
         }
     };
 
@@ -309,8 +313,9 @@ define([
     }
 
     MediaWallView.prototype.destroy = function () {
-        ContentListView.prototype.destroy.call(this);
+        this._clearColumns();
         this._columnViews = null;
+        ContentListView.prototype.destroy.call(this);
     };
 
     return MediaWallView;
