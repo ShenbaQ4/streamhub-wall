@@ -28,11 +28,7 @@ define([
         this._columnViews = [];
         this._columnInsertIndex = 0;
         this._containerInnerWidth = 0;
-
-        this.debouncedRelayout = debounce(function () {
-            self._relayout.apply(self, arguments);
-        }, opts.debounceRelayout || 200);
-
+        
         this.debouncedFitColumns = debounce(function () {
             self._fitColumns();
         }, opts.debounceRelayout || 200);
@@ -195,32 +191,32 @@ define([
      * Removes column views from the MediaWallView
      */
     MediaWallView.prototype._clearColumns = function () {
-        var contentViews = [];
         for (var i=0; i < this._columnViews.length; i++) {
             var columnView = this._columnViews[i];
-            contentViews = contentViews.concat(columnView.views);
             columnView.detach();
-        }
-        this.views = contentViews;
-        if (this.comparator) {
-            this.views.sort(this.comparator);
+            columnView.destroy();
         }
         this._columnViews = [];
     };
 
     /**
-     * Add a piece of Content to the MediaWallView
-     * @param content {Content} A Content model to add to the MediaWallView
-     * @param [index] {number} Where to add the content
-     * @return the newly created ContentView
+     * Insert a contentView into the Media Wall's column ContentListViews
+     * @protected
+     * @param view {View} The view to add to this.el
+     * @param [forcedIndex] {number} Index of the view in this.views
      */
-    MediaWallView.prototype.add = function(content, index) {
-        var contentView = ContentListView.prototype.add.apply(this, arguments);
-
+    MediaWallView.prototype._insert = function (contentView, forcedIndex) {
         var targetColumnView = this._columnViews[this._columnInsertIndex];
         this._columnInsertIndex++;
         this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
-        targetColumnView.add(contentView);
+        
+        if (typeof(forcedIndex) === 'number') {
+            forcedIndex = Math.min(
+                    Math.ceil(forcedIndex / this._columnViews.length),
+                    targetColumnView.views.length);
+        }
+        targetColumnView.add(contentView, forcedIndex);
+
         // IE8 will not automatically push the 'show more' button down as the
         // wall grows. Adding and removing a random class will force a repaint
         var randomClass = String(Math.floor(Math.random()));
@@ -228,23 +224,8 @@ define([
         this.$el.removeClass(randomClass);
     };
 
-    MediaWallView.prototype._insert = function (contentView) {
-        return; // no-op: contentView inserts are deferred to individual Column views
-    };
-
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
-        if (opts.force) {
-            this._relayout.apply(this, arguments);
-        } else {
-            this.debouncedRelayout.apply(this, arguments);
-        }
-    };
-
-    /**
-     * Re-renders all content views for the MediaWallView.
-     */
-    MediaWallView.prototype._relayout = function(opts) {
         this.columnBasedLayout();
     };
 
@@ -252,12 +233,15 @@ define([
      * The column-based round-robin strategy of laying out content views
      */
     MediaWallView.prototype.columnBasedLayout = function () {
-        // Round-robin through columns, prepending each column with the next
+        // Round-robin through columns, inserting each column with the next
         // available view
         this._columnInsertIndex = 0;
-        for (var i=this.views.length-1; i >= 0; i--) {
+        for (var i=0; i < this.views.length; i++) {
             var contentView = this.views[i];
-            this.add(contentView.content);
+            var index = this._isIndexedView(contentView) ? i : undefined;
+            if (contentView) {
+                this._insert(contentView.content, index);
+            }
         }
     };
 
@@ -309,8 +293,9 @@ define([
     }
 
     MediaWallView.prototype.destroy = function () {
-        ContentListView.prototype.destroy.call(this);
+        this._clearColumns();
         this._columnViews = null;
+        ContentListView.prototype.destroy.call(this);
     };
 
     return MediaWallView;
