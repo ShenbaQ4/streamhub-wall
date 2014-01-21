@@ -51,32 +51,110 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
             });
         });
 
-        describe("when adding content with different .createdAt dates", function () {
-            var view,
-                startDateInt = 1375383041586,
-                date1 = new Date(startDateInt),
-                date2 = new Date(startDateInt + 1 * 10000),
-                date3 = new Date(startDateInt + 2 * 10000),
-                content1, content2, content3;
+        describe("when adding content", function () {
+            var stream,
+                content;
             beforeEach(function () {
-	            setFixtures('<div id="hub-MediaWallView"></div>');
-                $('#hub-MediaWallView').width(300*4); //220px is the default width of content
-	            view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
-                content1 = new Content({ body: 'what1' });
-                content1.createdAt = date1;
-                content2 = new Content({ body: 'what2' });
-                content2.createdAt = date2;
-                content3 = new Content({ body: 'what3' });
-                content3.createdAt = date3;
-                view.add(content3);
-                view.add(content1);
-                view.add(content2);
+                //Create wall with forced column count and prepare streams
+                setFixtures('<div id="hub-MediaWallView"></div>');
+                stream = new MockStream();
             });
-            it("should select target column ContentView to write into", function () {
-                expect(view._columnViews.length).toEqual(4);
-                expect(view._columnViews[0].views[0].content).toEqual(content3);
-                expect(view._columnViews[1].views[0].content).toEqual(content1);
-                expect(view._columnViews[2].views[0].content).toEqual(content2);
+            
+            describe('with a forced index', function () {
+                var view,
+                    onEnd,
+                    contentBody = "INSERTED",
+                    columnCount = 3;
+                beforeEach(function () {
+                    view = new MediaWallView({
+                        el: $('#hub-MediaWallView').get(0),
+                        columns: columnCount
+                    });
+                    content = new Content({ body: contentBody });
+                    onEnd = jasmine.createSpy('onEnd');
+                    stream.on('end', onEnd);
+                });
+                
+                it('places that content at the top of the next column if forcedIndex is 0', function () {
+                    var forcedIndex = 0;
+
+                    stream.pipe(view);
+                    waitsFor(function () {
+                        return onEnd.callCount;
+                    }, 1000);
+                    runs(function () {
+                        var streamLength = view.views.length,
+                            column = view._columnViews[streamLength%columnCount];
+
+                        expect(column.views[0].content).not.toEqual(content);
+
+                        view.add(content, forcedIndex);
+                        expect(column.views[0].content).toEqual(content);
+                    });
+                });
+                
+                it('places that content at the bottom of the next column if forcedIndex >= views.length-1', function () {
+                    stream.pipe(view);
+                    waitsFor(function () {
+                        return onEnd.callCount;
+                    }, 1000);
+                    runs(function () {
+                        var streamLength = view.views.length,
+                            forcedIndex = streamLength,
+                            column = view._columnViews[streamLength%columnCount];
+
+                        expect(column.views[0].content).not.toEqual(content);
+
+                        view.add(content, forcedIndex);
+                        expect(column.views[column.views.length-1].content).toEqual(content);
+                    });
+                });
+                
+                it('places that content in the next column relative to the column length for 0 < forcedIndex < views.length-1', function () {
+                    stream.pipe(view);
+                    waitsFor(function () {
+                        return onEnd.callCount;
+                    }, 1000);
+                    runs(function () {
+                        var streamLength = view.views.length,
+                            forcedIndex = view.views.length >>> 1,
+                            column = view._columnViews[streamLength%columnCount];
+
+                        expect(column.views[0].content).not.toEqual(content);
+
+                        view.add(content, forcedIndex);
+                        expect(column.views[Math.ceil(forcedIndex/columnCount)].content).toEqual(content);
+                    });
+                });
+            });
+            
+            describe("with different .createdAt dates", function () {
+                var view,
+                    startDateInt = 1375383041586,
+                    date1 = new Date(startDateInt),
+                    date2 = new Date(startDateInt + 1 * 10000),
+                    date3 = new Date(startDateInt + 2 * 10000),
+                    content1, content2, content3;
+                beforeEach(function () {
+                    $('#hub-MediaWallView').width(300*4); //220px is the default width of content
+    	            view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
+                    content1 = new Content({ body: 'what1' });
+                    content1.createdAt = date1;
+                    content2 = new Content({ body: 'what2' });
+                    content2.createdAt = date2;
+                    content3 = new Content({ body: 'what3' });
+                    content3.createdAt = date3;
+                    view.add(content3);
+                    view.add(content1);
+                    view.add(content2);
+                });
+                
+                it("should select target column ContentView to write into", function () {
+                    expect(view._columnViews.length).toEqual(4);
+                    expect(view._columnViews[0].views[0].content).toEqual(content3);
+                    expect(view._columnViews[1].views[0].content).toEqual(content1);
+                    expect(view._columnViews[2].views[0].content).toEqual(content2);
+                });
             });
         });
 
