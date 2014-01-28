@@ -108,6 +108,8 @@ define([
         this.$el
             .addClass(this.mediaWallClassName)
             .addClass('streamhub-media-wall-' + this._id);
+
+        this.fitColumns();
     };
 
     MediaWallView.prototype.fitColumns = function (opts) {
