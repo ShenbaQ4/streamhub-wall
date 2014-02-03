@@ -12,15 +12,15 @@ The quickest way to use streamhub-wall is to use the built version hosted on Liv
 
 streamhub-wall depends on [streamhub-sdk](https://github.com/livefyre/streamhub-sdk). Ensure it's been included in your page.
 
-	<script src="http://cdn.livefyre.com/libs/sdk/v2.0.3/streamhub-sdk.min.js"></script>
+	<script src="http://cdn.livefyre.com/libs/sdk/v2.6.1/streamhub-sdk.min.js"></script>
 
 Include streamhub-wall too.
 
-	<script src="http://cdn.livefyre.com/libs/apps/Livefyre/streamhub-wall/v2.0.0-build.85/streamhub-wall.min.js"></script>
+	<script src="http://cdn.livefyre.com/libs/apps/Livefyre/streamhub-wall/v2.2.4-build.155/streamhub-wall.min.js"></script>
 	
 Optionally, include some reasonable default CSS rules for StreamHub Content
 
-    <link rel="stylesheet" href="http://cdn.livefyre.com/libs/sdk/v2.0.3/streamhub-sdk.min.css" />
+    <link rel="stylesheet" href="http://cdn.livefyre.com/libs/sdk/v2.6.1/streamhub-sdk.min.css" />
 
 ### Usage
 
@@ -47,7 +47,7 @@ Optionally, include some reasonable default CSS rules for StreamHub Content
 
         collection.pipe(wallView);
         
-You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.net/kwwTf/22/).
+You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.net/kwwTf/81/).
 
 ### Options
 
