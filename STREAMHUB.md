@@ -16,7 +16,6 @@ MediaWall has been used on many StreamHub-powered sites, including:
 
 * [SX.livefyre.com](http://sx.livefyre.com/wall/) - Showcasing curated photos tagged with #sxsw during SXSW 2013
 * [superbowl.livefyre.com](http://superbowl.livefyre.com/#/media) - Displaying curated photos from Super Bowl parties around the globe
-* [The Voice Australia](http://www.thevoice.com.au/social.html) - The Voice's SocialHub presents photos and tweets about Australia's top music show
 * [CES.livefyre.com](http://ces.livefyre.com/) - Photos from on-location at CES 2013 in Las Vegas
 
 ## Usage
