@@ -49,6 +49,8 @@ Optionally, include some reasonable default CSS rules for StreamHub Content
         
 You now have a Wall! See this all in action on [this jsfiddle](http://jsfiddle.net/kwwTf/91/).
 
+Note: Any styling customization of Tweets rendered by streamhub-sdk must be done in accordance with Twitter's [Display Requirements](https://dev.twitter.com/terms/display-requirements).
+
 ### Options
 
 ####```minContentWidth```
