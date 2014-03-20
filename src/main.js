@@ -28,6 +28,8 @@ define([
         this._columnViews = [];
         this._columnInsertIndex = 0;
         this._containerInnerWidth = 0;
+
+        this._insertStrategy = opts.insertStrategy || MediaWallView.INSERT_STRATEGIES.SHORTEST_COLUMN;
         
         this.debouncedFitColumns = debounce(function () {
             self._fitColumns();
@@ -58,6 +60,31 @@ define([
 
     MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
     MediaWallView.prototype.columnClassName = 'hub-wall-column';
+
+    MediaWallView.INSERT_STRATEGIES = {
+        ROUND_ROBIN: function () {
+            this._columnInsertIndex++;
+            this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
+            return this._columnViews[this._columnInsertIndex];
+        },
+        SHORTEST_COLUMN: function () {
+            var targetColIndex = this._columnInsertIndex;
+            var shortestHeight;
+            for (var i=0; i < this._columnViews.length; i++) {
+                var colHeight = this._columnViews[i].$el.height();
+                if (shortestHeight === undefined) {
+                    shortestHeight = colHeight;
+                    targetColIndex = i;
+                    continue;
+                }
+                if (colHeight < shortestHeight) {
+                    shortestHeight = colHeight;
+                    targetColIndex = i;
+                }
+            }
+            return this._columnViews[targetColIndex];
+        }
+    };
 
     /**
      * Gets the style element associated with this instance of MediaWallView
@@ -208,10 +235,8 @@ define([
      * @param [forcedIndex] {number} Index of the view in this.views
      */
     MediaWallView.prototype._insert = function (contentView, forcedIndex) {
-        var targetColumnView = this._columnViews[this._columnInsertIndex];
-        this._columnInsertIndex++;
-        this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
-        
+        var targetColumnView = this._insertStrategy(contentView);
+
         if (typeof(forcedIndex) === 'number') {
             forcedIndex = Math.min(
                     Math.ceil(forcedIndex / this._columnViews.length),
@@ -228,15 +253,8 @@ define([
 
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
-        this.columnBasedLayout();
-    };
 
-    /**
-     * The column-based round-robin strategy of laying out content views
-     */
-    MediaWallView.prototype.columnBasedLayout = function () {
-        // Round-robin through columns, inserting each column with the next
-        // available view
+        // Re-insert all content views
         this._columnInsertIndex = 0;
         for (var i=0; i < this.views.length; i++) {
             var contentView = this.views[i];
