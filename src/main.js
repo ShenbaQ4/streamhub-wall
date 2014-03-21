@@ -66,7 +66,7 @@ define([
     MediaWallView.columnPickers = {
         roundRobin: function (contentView, forcedIndex) {
             this._roundRobinInsertIndex++;
-            this._roundRobinInsertIndex = this._roundRobinInsertIndex >= this._columnViews.length ? 0 : this._roundRobinInsertIndex;
+            this._roundRobinInsertIndex = this._roundRobinInsertIndex % this._columnViews.length;
             return this._roundRobinInsertIndex;
         },
         shortestColumn: function (contentView, forcedIndex) {
