@@ -26,10 +26,13 @@ define([
         this._autoFitColumns = true;
         this._contentWidth = opts.minContentWidth || 300;
         this._columnViews = [];
-        this._columnInsertIndex = 0;
+        this._roundRobinInsertIndex = 0;
+        this._shortestColInsertIndex = 0;
         this._containerInnerWidth = 0;
+        this._columnHeights = {};
+        this._animate = opts.animate === undefined ? true : opts.animate;
 
-        this._insertStrategy = opts.insertStrategy || MediaWallView.INSERT_STRATEGIES.SHORTEST_COLUMN;
+        this._pickColumnIndex = opts.pickColumn || MediaWallView.columnPickers.shortestColumn;
         
         this.debouncedFitColumns = debounce(function () {
             self._fitColumns();
@@ -57,34 +60,56 @@ define([
     };
     inherits(MediaWallView, ContentListView);
 
-
     MediaWallView.prototype.mediaWallClassName = 'streamhub-media-wall-view';
     MediaWallView.prototype.columnClassName = 'hub-wall-column';
 
-    MediaWallView.INSERT_STRATEGIES = {
-        ROUND_ROBIN: function () {
-            this._columnInsertIndex++;
-            this._columnInsertIndex = this._columnInsertIndex == this._columnViews.length ? 0 : this._columnInsertIndex;
-            return this._columnViews[this._columnInsertIndex];
+    MediaWallView.columnPickers = {
+        roundRobin: function (contentView, forcedIndex) {
+            this._roundRobinInsertIndex++;
+            this._roundRobinInsertIndex = this._roundRobinInsertIndex >= this._columnViews.length ? 0 : this._roundRobinInsertIndex;
+            return this._roundRobinInsertIndex;
         },
-        SHORTEST_COLUMN: function () {
-            var targetColIndex = this._columnInsertIndex;
+        shortestColumn: function (contentView, forcedIndex) {
+            var newContentViewIndex = forcedIndex || this.views.indexOf(contentView);
+            if (newContentViewIndex === 0 || this.views.length <= this._columnViews.length) {
+                return MediaWallView.columnPickers.roundRobin.apply(this, arguments);
+            }
+
+            var targetColIndex = this._shortestColInsertIndex;
             var shortestHeight;
             for (var i=0; i < this._columnViews.length; i++) {
-                var colHeight = this._columnViews[i].$el.height();
+                var colHeight = this._columnHeights[i];
+
                 if (shortestHeight === undefined) {
                     shortestHeight = colHeight;
                     targetColIndex = i;
                     continue;
                 }
+
                 if (colHeight < shortestHeight) {
                     shortestHeight = colHeight;
                     targetColIndex = i;
+                } else if (colHeight == shortestHeight) {
+                    break;
                 }
             }
-            return this._columnViews[targetColIndex];
+
+            targetColIndex = targetColIndex >= this._columnViews.length ? 0 : targetColIndex;
+            this._shortestColInsertIndex = targetColIndex;
+            return targetColIndex;
         }
     };
+
+    MediaWallView.prototype.events = ContentListView.prototype.events.extended({
+        'imageLoaded.hub': function (e, opts) {
+            for (var i=0; i < this._columnViews.length; i++) {
+                if (this._columnViews[i].views.indexOf(opts.contentView) > -1) {
+                    this._columnHeights[i] = this._columnViews[i].$el.height();
+                    break;
+                }
+            }
+        }
+    });
 
     /**
      * Gets the style element associated with this instance of MediaWallView
@@ -208,7 +233,8 @@ define([
     MediaWallView.prototype._createColumnView = function () {
         var columnView = new ContentListView({
             maxVisibleItems: this._getMaxVisibleItemsForColumn(),
-            stash: this.more
+            stash: this.more,
+            animate: this._animate
         });
         this._columnViews.push(columnView);
         columnView.$el.addClass(this.columnClassName);
@@ -235,7 +261,8 @@ define([
      * @param [forcedIndex] {number} Index of the view in this.views
      */
     MediaWallView.prototype._insert = function (contentView, forcedIndex) {
-        var targetColumnView = this._insertStrategy(contentView);
+        var targetColumnIndex = this._pickColumnIndex(contentView, forcedIndex);
+        var targetColumnView = this._columnViews[targetColumnIndex];
 
         if (typeof(forcedIndex) === 'number') {
             forcedIndex = Math.min(
@@ -249,13 +276,23 @@ define([
         var randomClass = String(Math.floor(Math.random()));
         this.$el.addClass(randomClass);
         this.$el.removeClass(randomClass);
+
+        if (this._columnHeights[targetColumnIndex] === undefined) {
+            this._columnHeights[targetColumnIndex] = 0;
+        }
+        this._columnHeights[targetColumnIndex] = targetColumnView.$el.height();
     };
 
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
 
+        // Reset column insert state
+        for (var i=0; i < this._columnViews.length; i++) {
+            this._columnHeights[i] = 0;
+        }
+        this._roundRobinInsertIndex = -1;
+
         // Re-insert all content views
-        this._columnInsertIndex = 0;
         for (var i=0; i < this.views.length; i++) {
             var contentView = this.views[i];
             var index = this._isIndexedView(contentView) ? i : undefined;
