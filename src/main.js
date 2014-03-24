@@ -102,8 +102,9 @@ define([
 
     MediaWallView.prototype.events = ContentListView.prototype.events.extended({
         'imageLoaded.hub': function (e, opts) {
+            opts = opts || {};
             for (var i=0; i < this._columnViews.length; i++) {
-                if (this._columnViews[i].views.indexOf(opts.contentView) > -1) {
+                if (opts.contentView && this._columnViews[i].views.indexOf(opts.contentView) > -1) {
                     this._columnHeights[i] = this._columnViews[i].$el.height();
                     break;
                 }
@@ -297,7 +298,7 @@ define([
             var contentView = this.views[i];
             var index = this._isIndexedView(contentView) ? i : undefined;
             if (contentView) {
-                this._insert(contentView.content, index);
+                this._insert(contentView, index);
             }
         }
     };
