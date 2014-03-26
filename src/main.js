@@ -33,16 +33,13 @@ define([
         this._animate = opts.animate === undefined ? true : opts.animate;
 
         this._pickColumnIndex = opts.pickColumn || MediaWallView.columnPickers.shortestColumn;
-        
-        this.debouncedFitColumns = debounce(function () {
-            self._fitColumns();
-        }, opts.debounceRelayout || 200);
 
         ContentListView.call(this, opts);
  
         $(window).resize(function(e) {
             if (self._autoFitColumns) {
                 self.fitColumns();
+                self.relayout();
             }
         });
 
@@ -55,7 +52,7 @@ define([
             this.setColumns(opts.columns);
         }
         if (this._autoFitColumns) {
-            this.fitColumns({ force: true });
+            this.fitColumns();
         }
     };
     inherits(MediaWallView, ContentListView);
@@ -66,7 +63,7 @@ define([
     MediaWallView.columnPickers = {
         roundRobin: function (contentView, forcedIndex) {
             this._roundRobinInsertIndex++;
-            this._roundRobinInsertIndex = this._roundRobinInsertIndex % this._columnViews.length;
+            this._roundRobinInsertIndex = this._roundRobinInsertIndex % this._numberOfColumns;
             return this._roundRobinInsertIndex;
         },
         shortestColumn: function (contentView, forcedIndex) {
@@ -165,16 +162,12 @@ define([
         this.fitColumns();
     };
 
-    MediaWallView.prototype.fitColumns = function (opts) {
-        if (this._containerInnerWidth === this.$el.innerWidth()) {
-            return;
-        }
-        opts = opts || {};
+    MediaWallView.prototype.render = function () {
+        ContentListView.prototype.render.call(this);
 
-        if (opts.force) {
-            this._fitColumns.apply(this, arguments);
-        } else {
-            this.debouncedFitColumns.apply(this, arguments);
+        for (var i=0; i < this._numberOfColumns; i++) {
+            var columnView = this._createColumnView();
+            columnView.render();
         }
     };
 
@@ -183,7 +176,10 @@ define([
      * Initiates relayout logic for the determined number of columns.
      * @param opts {Object}
      */
-    MediaWallView.prototype._fitColumns = function (opts) {
+    MediaWallView.prototype.fitColumns = function (opts) {
+        if (this._containerInnerWidth === this.$el.innerWidth()) {
+            return;
+        }
         var latestWidth = this.$el.innerWidth();
         // If width hasn't changed, do nothing
         if (latestWidth === this._containerInnerWidth) {
@@ -192,7 +188,8 @@ define([
 
         this._containerInnerWidth = latestWidth;
         var numColumns = parseInt(this._containerInnerWidth / this._contentWidth, 10) || 1;
-        this._clearColumns();
+        console.log('a',numColumns);
+        //this._clearColumns();
         this.setColumns(numColumns);
     };
 
@@ -210,13 +207,7 @@ define([
         $wallStyleEl = $('<style id="wall-style-' + this._id + '"></style');
         this._setColumnWidth((100/this._numberOfColumns) + '%');
 
-        for (var i=0; i < this._numberOfColumns; i++) {
-            this._createColumnView();
-        }
-
         this._moreAmount = this._moreAmount || numColumns * 2; // Show more displays 2 new rows
-
-        this.relayout();
     };
 
     /**
@@ -232,6 +223,9 @@ define([
      * @returns {View} The view representing a column in the MediaWall. Often a type of ListView.
      */
     MediaWallView.prototype._createColumnView = function () {
+        if (this._columnViews.length >= this._numberOfColumns) {
+            return;
+        }
         var columnView = new ContentListView({
             maxVisibleItems: this._getMaxVisibleItemsForColumn(),
             stash: this.more,
@@ -287,6 +281,13 @@ define([
     MediaWallView.prototype.relayout = function (opts) {
         opts = opts || {};
 
+        this._clearColumns();
+        console.log('b',this._numberOfColumns, this.$listEl.find('.hub-wall-column').length);
+        for (var i=0; i < this._numberOfColumns; i++) {
+            var columnView = this._createColumnView();
+            this._columnViews[i].render();
+        }
+
         // Reset column insert state
         for (var i=0; i < this._columnViews.length; i++) {
             this._columnHeights[i] = 0;
@@ -319,36 +320,6 @@ define([
         }
         ContentListView.prototype.showMore.call(this, numToShow);
     };
-
-    /**
-     * Returns a function, that, as long as it continues to be invoked, will not be triggered.
-     * The function will be called after it stops being called for N milliseconds.
-     * Copied from Underscore.js (MIT License) http://underscorejs.org/docs/underscore.html#section-65
-     * @param func {function} The function to debounce
-     * @param wait {number} The number of milliseconds to wait for execution of func
-     * @param immediate {boolean} trigger the function on the leading edge, instead of the trailing.
-     * @return {function} A debounced version of the passed `func`
-     */
-    function debounce(func, wait, immediate) {
-        var timeout, result;
-        return function() {
-            var context = this,
-                args = arguments;
-            var later = function() {
-                timeout = null;
-                if (!immediate) {
-                    result = func.apply(context, args);
-                }
-            };
-            var callNow = immediate && !timeout;
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
-            if (callNow) {
-                result = func.apply(context, args);
-            }
-            return result;
-        };
-    }
 
     MediaWallView.prototype.destroy = function () {
         this._clearColumns();
