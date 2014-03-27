@@ -1,11 +1,12 @@
 define([
     'jasmine',
     'streamhub-wall',
+    'streamhub-sdk/content/views/content-list-view',
     'streamhub-sdk',
     'streamhub-sdk/content',
     'streamhub-sdk-tests/mocks/mock-attachments-stream',
     'jasmine-jquery'],
-function (jasmine, MediaWallView, Hub, Content, MockStream) {
+function (jasmine, MediaWallView, ContentListView, Hub, Content, MockStream) {
     'use strict';
 
     describe('A MediaWallView', function () {
@@ -261,10 +262,10 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
         it('calls #fitColumns() when window is resized', function () {
             $('#hub-MediaWallView').width(220*4); //220px is the default width of content
 	        view = new MediaWallView({ el: $('#hub-MediaWallView').get(0) });
-            spyOn(view, 'fitColumns');
+            spyOn(view, 'debouncedRelayout');
             $(window).trigger('resize');
             expect(view._autoFitColumns).toBe(true);
-            expect(view.fitColumns).toHaveBeenCalled();
+            expect(view.debouncedRelayout).toHaveBeenCalled();
         });
 
         it('sets column width proportional to the media wall width', function () {
@@ -273,4 +274,60 @@ function (jasmine, MediaWallView, Hub, Content, MockStream) {
             expect(view._columnViews.length).toBe(parseInt(12345/400));
         });
     });
+
+    describe('when rendering', function () {
+        var view;
+
+	    beforeEach(function() {
+	        setFixtures('<div id="hub-MediaWallView"></div>');
+            $('#hub-MediaWallView').width(300*4); //220px is the default width of content
+
+            spyOn(MediaWallView.prototype, 'fitColumns').andCallThrough();
+            view = new MediaWallView({
+                el : $('#hub-MediaWallView').get(0),
+                autoRender: false
+            });
+		});
+
+        it('calls base #render and creates column views', function () {
+            expect(view._numberOfColumns).toBe(4);
+            expect(view._columnViews.length).toEqual(0);
+            view.render();
+            expect(view._columnViews.length).toEqual(view._numberOfColumns);
+
+            view.render();
+            expect(view._numberOfColumns).toBe(4);
+            expect(view._columnViews.length).toEqual(view._numberOfColumns);
+        });
+    });
+
+    describe('when relayouting', function () {
+        var view;
+
+	    beforeEach(function() {
+	        setFixtures('<div id="hub-MediaWallView"></div>');
+            $('#hub-MediaWallView').width(300*4); //220px is the default width of content
+
+            spyOn(MediaWallView.prototype, 'fitColumns').andCallThrough();
+            view = new MediaWallView({
+                el : $('#hub-MediaWallView').get(0)
+            });
+		});
+
+        it('expects child views to retain their event handlers (e.g. TiledAttachmentListView.el)', function () {
+            expect(view._numberOfColumns).toBe(4);
+            spyOn(MediaWallView.prototype, '_clearColumns').andCallThrough();
+            spyOn(MediaWallView.prototype, '_createColumnView').andCallThrough();
+            view.relayout();
+            expect(MediaWallView.prototype._clearColumns).toHaveBeenCalled();
+            expect(MediaWallView.prototype._createColumnView.callCount).toBe(view._numberOfColumns);
+        });
+
+        it('should call ContentListView#clear in _clearColumns', function () {
+            spyOn(ContentListView.prototype, 'clear');
+            view.relayout();
+            expect(ContentListView.prototype.clear).toHaveBeenCalled();
+        });
+    });
+
 });
