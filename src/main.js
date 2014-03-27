@@ -178,13 +178,12 @@ define([
         if (this._columnViews.length === 0) {
             for (var i=0; i < this._numberOfColumns; i++) {
                 columnView = this._createColumnView();
+                this._attachColumnView(columnView);
                 columnView.render();
             }
         } else {
             for (var i=0; i < this._columnViews.length; i++) {
-                columnView = this._columnViews[i];
-                columnView.$el.addClass(this.columnClassName);
-                this.$listEl.append(columnView.$el);
+                this._attachColumnView(this._columnViews[i]);
             }
         }
     };
@@ -240,6 +239,13 @@ define([
         return this._maxVisibleItems/this._numberOfColumns;
     };
 
+    MediaWallView.prototype._attachColumnView = function (columnView) {
+        if (this._columnViews.indexOf(columnView) === -1) {
+            this._columnViews.push(columnView);
+        }
+        this.$listEl.append(columnView.$el);
+    };
+
     /**
      * Creates a column view and appends it into the DOM
      * @returns {View} The view representing a column in the MediaWall. Often a type of ListView.
@@ -254,9 +260,7 @@ define([
             animate: this._animate,
             autoRender: false
         });
-        this._columnViews.push(columnView);
         columnView.$el.addClass(this.columnClassName);
-        this.$listEl.append(columnView.$el);
         return columnView;
     };
 
@@ -303,6 +307,7 @@ define([
         this._clearColumns();
         for (var i=0; i < this._numberOfColumns; i++) {
             var columnView = this._createColumnView();
+            this._attachColumnView(columnView);
             columnView.render();
         }
 
