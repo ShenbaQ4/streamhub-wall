@@ -80,7 +80,7 @@ By default, when there are attachments for a piece of content the thumbnail can 
             modal: false
         });
 
-###```pickColumn```
+####```pickColumn```
 By default, when content is inserted into the wall it will be populated into the column of the shortest height. To configure the strategy in which the column is chosen, specify the ```pickColumn``` option in the constructor. This option expects a function with args: ```(columnView, forcedIndex)```, and returns the zero-based index of the column to insert into.
 
 ```
