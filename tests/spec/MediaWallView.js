@@ -323,12 +323,6 @@ function (jasmine, MediaWallView, ContentListView, Hub, Content, MockStream) {
             expect(MediaWallView.prototype._createColumnView.callCount).toBe(view._numberOfColumns);
         });
 
-        it('should not call ContentListView#destroy in _clearColumns', function () {
-            spyOn(ContentListView.prototype, 'destroy');
-            view.relayout();
-            expect(ContentListView.prototype.destroy).not.toHaveBeenCalled();
-        });
-
         it('should call ContentListView#clear in _clearColumns', function () {
             spyOn(ContentListView.prototype, 'clear');
             view.relayout();

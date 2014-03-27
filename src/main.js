@@ -272,6 +272,7 @@ define([
             var columnView = this._columnViews[i];
             columnView.detach();
             columnView.clear();
+            columnView.destroy();
         }
         this._columnViews = [];
     };
