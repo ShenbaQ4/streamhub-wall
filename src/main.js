@@ -190,26 +190,6 @@ define([
     };
 
     /**
-     * Creates a column view and appends it into the DOM
-     * @returns {View} The view representing a column in the MediaWall. Often a type of ListView.
-     */
-    MediaWallView.prototype._createColumnView = function () {
-        if (this._columnViews.length >= this._numberOfColumns) {
-            return;
-        }
-        var columnView = new ContentListView({
-            maxVisibleItems: this._getMaxVisibleItemsForColumn(),
-            stash: this.more,
-            animate: this._animate,
-            autoRender: false
-        });
-        this._columnViews.push(columnView);
-        columnView.$el.addClass(this.columnClassName);
-        this.$listEl.append(columnView.$el);
-        return columnView;
-    };
-
-    /**
      * Determines the number columns based on the configured #_contentWidth.
      * Initiates relayout logic for the determined number of columns.
      * @param opts {Object}
@@ -258,6 +238,26 @@ define([
      */
     MediaWallView.prototype._getMaxVisibleItemsForColumn = function () {
         return this._maxVisibleItems/this._numberOfColumns;
+    };
+
+    /**
+     * Creates a column view and appends it into the DOM
+     * @returns {View} The view representing a column in the MediaWall. Often a type of ListView.
+     */
+    MediaWallView.prototype._createColumnView = function () {
+        if (this._columnViews.length >= this._numberOfColumns) {
+            return;
+        }
+        var columnView = new ContentListView({
+            maxVisibleItems: this._getMaxVisibleItemsForColumn(),
+            stash: this.more,
+            animate: this._animate,
+            autoRender: false
+        });
+        this._columnViews.push(columnView);
+        columnView.$el.addClass(this.columnClassName);
+        this.$listEl.append(columnView.$el);
+        return columnView;
     };
 
     /**
