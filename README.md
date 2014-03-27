@@ -12,15 +12,15 @@ The quickest way to use streamhub-wall is to use the built version hosted on Liv
 
 streamhub-wall depends on [streamhub-sdk](https://github.com/livefyre/streamhub-sdk). Ensure it's been included in your page.
 
-	<script src="http://cdn.livefyre.com/libs/sdk/v2.6.1/streamhub-sdk.min.js"></script>
+	<script src="http://cdn.livefyre.com/libs/sdk/v2.7.0/streamhub-sdk.min.js"></script>
 
 Include streamhub-wall too.
 
-	<script src="http://cdn.livefyre.com/libs/apps/Livefyre/streamhub-wall/v2.2.4-build.155/streamhub-wall.min.js"></script>
+	<script src="http://cdn.livefyre.com/libs/apps/Livefyre/streamhub-wall/v2.3.0-build.184/streamhub-wall.min.js"></script>
 	
 Optionally, include some reasonable default CSS rules for StreamHub Content
 
-    <link rel="stylesheet" href="http://cdn.livefyre.com/libs/sdk/v2.6.1/streamhub-sdk.min.css" />
+    <link rel="stylesheet" href="http://cdn.livefyre.com/libs/sdk/v2.7.0/streamhub-sdk.min.css" />
 
 ### Usage
 
@@ -79,6 +79,20 @@ By default, when there are attachments for a piece of content the thumbnail can 
             columns: 5,
             modal: false
         });
+
+###```pickColumn```
+By default, when content is inserted into the wall it will be populated into the column of the shortest height. To configure the strategy in which the column is chosen, specify the ```pickColumn``` option in the constructor. This option expects a function with args: ```(columnView, forcedIndex)```, and returns the zero-based index of the column to insert into.
+
+```
+var wall = new MediaWallView({
+    el: el,
+    pickColumn: function (columnView, forcedIndex) {
+        var targetIndex;
+        // the strategy
+        return targetIndex;
+    }
+});
+```
 
 
 ## Local Development
