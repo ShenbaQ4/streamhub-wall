@@ -28,12 +28,12 @@ function (jasmine, MediaWallView, ContentListView, Hub, Content, MockStream) {
                 expect(view).toBeDefined();
             });
         });
-        
-        // post construction behavior    
+
+        // post construction behavior
         describe ("after correct construction", function () {
             var view;
             var stream;
-            
+
             beforeEach(function() {
                 setFixtures('<div id="hub-MediaWallView"></div>');
                 stream = new MockStream();
@@ -321,12 +321,6 @@ function (jasmine, MediaWallView, ContentListView, Hub, Content, MockStream) {
             view.relayout();
             expect(MediaWallView.prototype._clearColumns).toHaveBeenCalled();
             expect(MediaWallView.prototype._createColumnView.callCount).toBe(view._numberOfColumns);
-        });
-
-        it('should call ContentListView#clear in _clearColumns', function () {
-            spyOn(ContentListView.prototype, 'clear');
-            view.relayout();
-            expect(ContentListView.prototype.clear).toHaveBeenCalled();
         });
     });
 
