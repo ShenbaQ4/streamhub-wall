@@ -38,7 +38,7 @@ define([
         }, opts.debounceRelayout || 200);
 
         ContentListView.call(this, opts);
- 
+
         $(window).resize(function(e) {
             if (self._autoFitColumns) {
                 self.debouncedRelayout();
@@ -271,7 +271,6 @@ define([
         for (var i=0; i < this._columnViews.length; i++) {
             var columnView = this._columnViews[i];
             columnView.detach();
-            columnView.clear();
             columnView.destroy();
         }
         this._columnViews = [];
