@@ -27,7 +27,6 @@ $, Collection, Content, Auth, WallView) {
     };
     var listView = window.view = new WallView({
         el: document.getElementById("listView"),
-        initial: 5,
         sharer: function (content) {
             console.log('share', content);
         }
