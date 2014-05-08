@@ -12,6 +12,11 @@ require.config({
     inherits: 'lib/inherits/inherits',
     json: 'lib/requirejs-plugins/src/json'
   },
+  map: {
+    '*': {
+      'debug': 'streamhub-sdk/debug'
+    }
+  },
   packages: [{
     name: "streamhub-wall",
     location: "./src"
@@ -40,6 +45,12 @@ require.config({
     name: "view",
     location: "lib/view/src",
     main: "view"
+  },{
+    name: 'auth',
+    location: 'lib/auth/src'
+  },{
+    name: 'livefyre-auth',
+    location: 'lib/livefyre-auth/src'
   }],
   shim: {
     jquery: {

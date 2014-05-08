@@ -5,13 +5,14 @@
     "./src/main.js"
   ],
   "dependencies": {
-    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.7",
+    "streamhub-sdk": "git://github.com/Livefyre/streamhub-sdk.git#~v2.8",
     "cajon": "git://github.com/requirejs/cajon.git#~0.1.11"
   },
   "devDependencies": {
     "jasmine": "1.3.1",
     "jasmine-jquery": "1.6.0",
-    "almond": "~0.2.9"
+    "almond": "~0.2.9",
+    "livefyre-auth": "Livefyre/livefyre-auth"
   },
   "streamhub": {
     "icon": "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbbigHF-302x227.png",
@@ -22,5 +23,8 @@
       "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbprev-700x525_2.png",
       "https://raw.github.com/Livefyre/streamhub-wall/master/images/mediawall-thumbprev-700x525_3.png"
     ]
+  },
+  "resolutions": {
+    "view": "~1.1"
   }
 }
