@@ -4,7 +4,7 @@ all: build
 
 build: node_modules
 
-dist: src requirejs.conf.js tools
+dist: build src requirejs.conf.js tools
 	./node_modules/requirejs/bin/r.js -o ./tools/build.conf.js	
 
 # if package.json changes, install
