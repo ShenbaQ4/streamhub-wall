@@ -4,7 +4,7 @@ all: build
 
 build: node_modules
 
-dist:
+dist: src requirejs.conf.js tools
 	./node_modules/requirejs/bin/r.js -o ./tools/build.conf.js	
 
 # if package.json changes, install
@@ -20,8 +20,7 @@ clean:
 
 package: build
 
+env=dev
 deploy:
-	lfcdn
+	./node_modules/.bin/lfcdn -e $(env)
 
-deployprod:
-	lfcdn prod
